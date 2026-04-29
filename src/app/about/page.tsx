@@ -1,6 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
-import { CheckCircle, ArrowRight, Award, Users, Target, Eye } from "lucide-react";
+import { CheckCircle, Award, Target, Eye } from "lucide-react";
 import { companyInfo } from "@/data/company";
 
 export const metadata = {
@@ -13,7 +12,7 @@ export default function AboutPage() {
     <main>
       {/* Hero */}
       <section className="bg-gradient-to-r from-primary-dark to-primary py-16">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-white">
             <h1 className="text-4xl lg:text-5xl font-bold mb-4">About Us</h1>
             <p className="text-blue-200 text-lg max-w-2xl">Discover the story behind Radiatech Electra and our commitment to excellence in industrial piping solutions.</p>
@@ -22,8 +21,8 @@ export default function AboutPage() {
       </section>
 
       {/* Company Story */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-12 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <div className="flex items-center gap-3 mb-4">
@@ -38,7 +37,7 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="relative">
-              <Image src="/images/projects/WhatsApp Image 2026-04-17 at 12.17.21 PM.jpeg" alt="Radiatech Infrastructure" width={600} height={450} className="rounded-2xl shadow-lg w-full h-[400px] object-cover" />
+              <Image src="/images/aboutus.png" alt="About Radiatech Electra" width={600} height={450} className="rounded-2xl shadow-lg w-full h-[400px] object-cover" />
               <div className="absolute -bottom-6 -left-6 bg-accent text-white rounded-xl p-5 shadow-xl">
                 <div className="text-3xl font-bold">5+</div>
                 <div className="text-sm">Years of Excellence</div>
@@ -49,8 +48,8 @@ export default function AboutPage() {
       </section>
 
       {/* Mission / Vision / Values */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-12 sm:py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center card-hover">
               <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5"><Target size={32} className="text-primary" /></div>
@@ -72,12 +71,12 @@ export default function AboutPage() {
       </section>
 
       {/* Specializations */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-12 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Specializations</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
             {companyInfo.specializations.map((spec) => (
               <div key={spec} className="flex items-center gap-4 bg-gray-50 rounded-xl p-5 border border-gray-100">
                 <CheckCircle size={24} className="text-green shrink-0" />
@@ -89,12 +88,12 @@ export default function AboutPage() {
       </section>
 
       {/* Certifications */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-12 sm:py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Certifications & Compliance</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {companyInfo.certifications.map((cert) => (
               <div key={cert} className="bg-white rounded-xl p-6 text-center shadow-sm border border-gray-100">
                 <Award size={32} className="text-primary mx-auto mb-3" />
@@ -106,8 +105,8 @@ export default function AboutPage() {
       </section>
 
       {/* Factsheet */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-12 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Company Factsheet</h2>
           </div>
@@ -132,8 +131,8 @@ export default function AboutPage() {
       </section>
 
       {/* Stats */}
-      <section className="py-16 bg-gradient-to-r from-primary-dark to-primary">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-12 sm:py-16 bg-gradient-to-r from-primary-dark to-primary">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {companyInfo.statsItems.map((stat) => (
               <div key={stat.label} className="text-center text-white">

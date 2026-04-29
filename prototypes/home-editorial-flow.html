@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radiatech Electra - Homepage Concept B</title>
+  <meta
+    name="description"
+    content="Standalone homepage concept for Radiatech Electra with a warm editorial and material-rich visual direction."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --paper: #f5efe1;
+      --paper-strong: #fff9ef;
+      --paper-soft: #ece1d0;
+      --ink: #193028;
+      --ink-soft: #57665f;
+      --forest: #28493a;
+      --forest-deep: #173026;
+      --clay: #bf6b45;
+      --sun: #d6a54f;
+      --sage: #b4c4ae;
+      --rose: #ce8f7c;
+      --line: rgba(25, 48, 40, 0.12);
+      --line-strong: rgba(25, 48, 40, 0.22);
+      --shadow: 0 26px 60px rgba(60, 41, 25, 0.12);
+      --radius-xl: 36px;
+      --radius-lg: 28px;
+      --radius-md: 22px;
+      --radius-sm: 16px;
+      --max-width: 1240px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Archivo", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(214, 165, 79, 0.18), transparent 24%),
+        radial-gradient(circle at 0% 30%, rgba(191, 107, 69, 0.12), transparent 28%),
+        linear-gradient(180deg, #fbf6ec 0%, #f1e8d8 100%);
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(25, 48, 40, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(25, 48, 40, 0.03) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(circle at center, black 46%, transparent 100%);
+      z-index: -2;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at center, transparent 55%, rgba(78, 59, 42, 0.12) 100%);
+      z-index: -1;
+    }
+
+    ::selection {
+      background: rgba(191, 107, 69, 0.22);
+      color: var(--forest-deep);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -48px;
+      left: 18px;
+      z-index: 100;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: var(--forest);
+      color: #fff9ef;
+      font-weight: 700;
+    }
+
+    .skip-link:focus {
+      top: 18px;
+    }
+
+    .container {
+      width: min(var(--max-width), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .section {
+      padding: 96px 0;
+    }
+
+    .section-tight {
+      padding: 72px 0;
+    }
+
+    .section-head {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 34px;
+    }
+
+    .section-head.center {
+      text-align: center;
+      justify-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--clay);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      font-weight: 700;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 42px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--clay));
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      font-weight: 600;
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+    }
+
+    h2 {
+      font-size: clamp(2.3rem, 4vw, 4rem);
+    }
+
+    p {
+      margin: 0;
+      color: var(--ink-soft);
+    }
+
+    .lede {
+      max-width: 64ch;
+      font-size: 1.03rem;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(18px);
+      background: rgba(251, 246, 236, 0.84);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .site-header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      min-height: 82px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 50px;
+      height: 50px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: #fff8ef;
+      background: linear-gradient(135deg, var(--forest), var(--clay));
+      box-shadow: 0 12px 24px rgba(40, 73, 58, 0.18);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .brand-copy strong {
+      display: block;
+      font-size: 1rem;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+    }
+
+    .brand-copy span {
+      display: block;
+      color: var(--ink-soft);
+      font-size: 0.8rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      font-size: 0.92rem;
+      color: var(--ink-soft);
+    }
+
+    .nav-links a:hover {
+      color: var(--forest);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chip,
+    .button,
+    .button-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 50px;
+      padding: 0 20px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      transition: transform 220ms var(--ease), box-shadow 220ms var(--ease), background 220ms var(--ease), border-color 220ms var(--ease);
+    }
+
+    .chip {
+      min-height: 44px;
+      padding-inline: 14px;
+      color: var(--forest);
+      background: rgba(255, 255, 255, 0.46);
+      border-color: rgba(25, 48, 40, 0.1);
+      font-size: 0.88rem;
+    }
+
+    .button {
+      background: var(--forest);
+      color: #fff8ef;
+      box-shadow: 0 14px 28px rgba(40, 73, 58, 0.16);
+    }
+
+    .button-secondary {
+      background: rgba(255, 255, 255, 0.54);
+      border-color: rgba(25, 48, 40, 0.14);
+      color: var(--forest-deep);
+    }
+
+    .button:hover,
+    .button-secondary:hover,
+    .hero-note:hover,
+    .metric-card:hover,
+    .category-card:hover,
+    .product-card:hover,
+    .value-card:hover,
+    .application-card:hover,
+    .timeline-card:hover,
+    .gallery-card:hover,
+    .quote-card:hover,
+    .logo-card:hover,
+    .blog-card:hover,
+    .contact-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .hero {
+      padding: 28px 0 0;
+    }
+
+    .hero-frame {
+      position: relative;
+      overflow: hidden;
+      padding: 34px;
+      border-radius: 42px;
+      border: 1px solid rgba(25, 48, 40, 0.08);
+      background:
+        radial-gradient(circle at top left, rgba(214, 165, 79, 0.2), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(191, 107, 69, 0.14), transparent 26%),
+        linear-gradient(180deg, rgba(255, 249, 239, 0.94), rgba(244, 236, 222, 0.98));
+      box-shadow: var(--shadow);
+    }
+
+    .hero-frame::before,
+    .hero-frame::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.5);
+      filter: blur(40px);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .hero-frame::before {
+      width: 220px;
+      height: 220px;
+      right: -80px;
+      top: -80px;
+    }
+
+    .hero-frame::after {
+      width: 280px;
+      height: 280px;
+      left: -120px;
+      bottom: -160px;
+      background: rgba(180, 196, 174, 0.4);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.03fr) minmax(360px, 0.97fr);
+      gap: 28px;
+      align-items: center;
+    }
+
+    .hero-copy {
+      display: grid;
+      gap: 22px;
+      align-content: start;
+      padding: 10px 0;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-kicker {
+      color: var(--clay);
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .hero-title {
+      max-width: 10.5ch;
+      font-size: clamp(3.3rem, 8vw, 6.6rem);
+      color: var(--ink);
+    }
+
+    .hero-title span {
+      color: var(--clay);
+      font-style: italic;
+    }
+
+    .hero-summary {
+      max-width: 62ch;
+      font-size: 1.04rem;
+    }
+
+    .hero-points {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 12px;
+      max-width: 58ch;
+    }
+
+    .hero-points li {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .hero-points li::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      margin-top: 7px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--clay), var(--sun));
+      box-shadow: 0 0 0 7px rgba(191, 107, 69, 0.08);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero-aside {
+      position: relative;
+      min-height: 620px;
+    }
+
+    .collage-main,
+    .collage-top,
+    .collage-bottom,
+    .hero-note,
+    .orb-badge {
+      position: absolute;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .collage-main,
+    .collage-top,
+    .collage-bottom {
+      border: 10px solid rgba(255, 249, 239, 0.94);
+      background: #fffdf8;
+    }
+
+    .collage-main {
+      left: 26px;
+      top: 34px;
+      width: 62%;
+      height: 420px;
+      transform: rotate(-4deg);
+    }
+
+    .collage-top {
+      right: 24px;
+      top: 0;
+      width: 38%;
+      height: 230px;
+      transform: rotate(6deg);
+    }
+
+    .collage-bottom {
+      right: 0;
+      bottom: 22px;
+      width: 46%;
+      height: 300px;
+      transform: rotate(-3deg);
+    }
+
+    .collage-main img,
+    .collage-top img,
+    .collage-bottom img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-note {
+      left: 0;
+      bottom: 28px;
+      width: 52%;
+      padding: 22px;
+      background: rgba(255, 249, 239, 0.96);
+      border: 1px solid rgba(25, 48, 40, 0.08);
+      animation: floatCard 6s ease-in-out infinite;
+    }
+
+    .hero-note strong {
+      display: block;
+      font-family: "Fraunces", serif;
+      font-size: 1.35rem;
+      margin-bottom: 10px;
+      color: var(--ink);
+    }
+
+    .hero-note p {
+      color: var(--ink-soft);
+      font-size: 0.94rem;
+    }
+
+    .orb-badge {
+      right: 90px;
+      top: 202px;
+      width: 136px;
+      height: 136px;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      text-align: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.95), rgba(236, 225, 208, 0.96));
+      border: 1px solid rgba(25, 48, 40, 0.08);
+      animation: floatBadge 8s ease-in-out infinite;
+    }
+
+    .orb-badge strong {
+      display: block;
+      font-family: "Fraunces", serif;
+      font-size: 1.85rem;
+      color: var(--clay);
+      line-height: 1;
+    }
+
+    .orb-badge span {
+      display: block;
+      margin-top: 8px;
+      color: var(--forest);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .hero-footer {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .metric-card,
+    .category-card,
+    .product-card,
+    .value-card,
+    .application-card,
+    .timeline-card,
+    .gallery-card,
+    .quote-card,
+    .logo-card,
+    .blog-card,
+    .contact-card,
+    .paper-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(25, 48, 40, 0.08);
+      background: rgba(255, 249, 239, 0.92);
+      box-shadow: var(--shadow);
+      transition: transform 250ms var(--ease), box-shadow 250ms var(--ease), border-color 250ms var(--ease);
+    }
+
+    .metric-card::before,
+    .category-card::before,
+    .product-card::before,
+    .value-card::before,
+    .application-card::before,
+    .timeline-card::before,
+    .gallery-card::before,
+    .quote-card::before,
+    .logo-card::before,
+    .blog-card::before,
+    .contact-card::before,
+    .paper-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(191, 107, 69, 0.06), transparent 40%);
+      opacity: 0;
+      transition: opacity 250ms var(--ease);
+      pointer-events: none;
+    }
+
+    .metric-card:hover,
+    .category-card:hover,
+    .product-card:hover,
+    .value-card:hover,
+    .application-card:hover,
+    .timeline-card:hover,
+    .gallery-card:hover,
+    .quote-card:hover,
+    .logo-card:hover,
+    .blog-card:hover,
+    .contact-card:hover,
+    .paper-card:hover {
+      border-color: rgba(25, 48, 40, 0.14);
+      box-shadow: 0 32px 60px rgba(60, 41, 25, 0.16);
+    }
+
+    .metric-card:hover::before,
+    .category-card:hover::before,
+    .product-card:hover::before,
+    .value-card:hover::before,
+    .application-card:hover::before,
+    .timeline-card:hover::before,
+    .gallery-card:hover::before,
+    .quote-card:hover::before,
+    .logo-card:hover::before,
+    .blog-card:hover::before,
+    .contact-card:hover::before,
+    .paper-card:hover::before {
+      opacity: 1;
+    }
+
+    .metric-card {
+      padding: 20px;
+      min-height: 152px;
+    }
+
+    .metric-card strong {
+      display: block;
+      font-family: "Fraunces", serif;
+      font-size: 2.3rem;
+      color: var(--forest);
+      margin-bottom: 8px;
+    }
+
+    .metric-card span {
+      display: block;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--clay);
+      margin-bottom: 8px;
+    }
+
+    .metric-card p {
+      font-size: 0.92rem;
+    }
+
+    .split-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .paper-card,
+    .contact-card {
+      padding: 28px;
+    }
+
+    .manifesto {
+      display: grid;
+      gap: 18px;
+    }
+
+    .signature-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .signature-line span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(40, 73, 58, 0.06);
+      color: var(--forest);
+      border: 1px solid rgba(25, 48, 40, 0.08);
+      font-size: 0.88rem;
+    }
+
+    .infrastructure-stack {
+      display: grid;
+      grid-template-columns: 1fr 0.82fr;
+      gap: 14px;
+      min-height: 560px;
+    }
+
+    .infra-main,
+    .infra-top,
+    .infra-bottom {
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      border: 1px solid rgba(25, 48, 40, 0.08);
+      background: #fffdf8;
+      box-shadow: var(--shadow);
+    }
+
+    .infra-main img,
+    .infra-top img,
+    .infra-bottom img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .infra-main {
+      min-height: 560px;
+    }
+
+    .infra-side {
+      display: grid;
+      gap: 14px;
+      grid-template-rows: 240px 1fr;
+    }
+
+    .infra-caption {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255, 249, 239, 0.9);
+      backdrop-filter: blur(10px);
+    }
+
+    .infra-caption strong {
+      display: block;
+      font-size: 1.15rem;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .category-card {
+      padding: 24px;
+      min-height: 240px;
+    }
+
+    .category-card:nth-child(1),
+    .category-card:nth-child(4) {
+      background: linear-gradient(180deg, rgba(255, 249, 239, 0.96), rgba(236, 225, 208, 0.92));
+    }
+
+    .category-card:nth-child(2),
+    .category-card:nth-child(5) {
+      background: linear-gradient(180deg, rgba(255, 249, 239, 0.96), rgba(214, 165, 79, 0.1));
+    }
+
+    .category-card:nth-child(3),
+    .category-card:nth-child(6) {
+      background: linear-gradient(180deg, rgba(255, 249, 239, 0.96), rgba(191, 107, 69, 0.1));
+    }
+
+    .category-index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: rgba(40, 73, 58, 0.08);
+      color: var(--forest);
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .category-card h3,
+    .product-card h3,
+    .value-card h3,
+    .application-card h3,
+    .timeline-card h3,
+    .quote-card h3,
+    .blog-card h3,
+    .contact-card h3 {
+      font-size: 1.45rem;
+      margin-bottom: 10px;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .meta-row span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(25, 48, 40, 0.08);
+      color: var(--forest);
+      font-size: 0.76rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .product-stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+      gap: 20px;
+    }
+
+    .product-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .product-card {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .product-image {
+      border-radius: 22px;
+      overflow: hidden;
+      aspect-ratio: 1 / 1;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-mark {
+      display: inline-flex;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(191, 107, 69, 0.12);
+      color: var(--clay);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-weight: 700;
+    }
+
+    .feature-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .value-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .value-column,
+    .application-column {
+      display: grid;
+      gap: 16px;
+    }
+
+    .value-card,
+    .application-card,
+    .timeline-card,
+    .quote-card,
+    .blog-card {
+      padding: 24px;
+    }
+
+    .application-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .application-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .application-card li {
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .application-card li::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      margin-top: 8px;
+      border-radius: 50%;
+      background: var(--sun);
+    }
+
+    .timeline-shell {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .timeline-shell::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 14px;
+      bottom: 14px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--sun), var(--clay), var(--forest));
+    }
+
+    .timeline-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .timeline-card {
+      margin-left: 18px;
+    }
+
+    .timeline-step {
+      position: absolute;
+      left: -26px;
+      top: 22px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--paper-strong);
+      border: 2px solid rgba(25, 48, 40, 0.14);
+      color: var(--forest);
+      font-weight: 700;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr 0.9fr;
+      gap: 18px;
+    }
+
+    .gallery-card {
+      min-height: 260px;
+    }
+
+    .gallery-card.large {
+      grid-row: span 2;
+      min-height: 560px;
+    }
+
+    .gallery-image {
+      position: relative;
+      height: 100%;
+      min-height: inherit;
+      overflow: hidden;
+    }
+
+    .gallery-image img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 500ms var(--ease);
+    }
+
+    .gallery-card:hover .gallery-image img {
+      transform: scale(1.06);
+    }
+
+    .gallery-copy {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255, 249, 239, 0.88);
+      backdrop-filter: blur(12px);
+    }
+
+    .trust-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .rating-card {
+      padding: 28px;
+      border-radius: 30px;
+      border: 1px solid rgba(25, 48, 40, 0.08);
+      background: linear-gradient(180deg, rgba(255, 249, 239, 0.96), rgba(236, 225, 208, 0.94));
+      box-shadow: var(--shadow);
+    }
+
+    .rating-card strong {
+      display: block;
+      font-family: "Fraunces", serif;
+      font-size: 4.4rem;
+      color: var(--forest);
+      line-height: 0.9;
+      margin-bottom: 10px;
+    }
+
+    .stars {
+      display: flex;
+      gap: 6px;
+      color: var(--sun);
+      margin-bottom: 18px;
+      font-size: 1.25rem;
+    }
+
+    .score-row {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .score {
+      display: grid;
+      gap: 6px;
+    }
+
+    .score span {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      color: var(--ink);
+    }
+
+    .score-bar {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(25, 48, 40, 0.08);
+      overflow: hidden;
+    }
+
+    .score-bar i {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--sun), var(--clay), var(--forest));
+    }
+
+    .quote-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .quote-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+
+    .quote-id {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(40, 73, 58, 0.08);
+      color: var(--forest);
+      font-weight: 700;
+    }
+
+    .quote-top strong {
+      display: block;
+      font-size: 1rem;
+      color: var(--ink);
+    }
+
+    .quote-top span,
+    .quote-date {
+      color: var(--ink-soft);
+      font-size: 0.82rem;
+    }
+
+    .quote-stars {
+      color: var(--sun);
+      letter-spacing: 0.08em;
+    }
+
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .logo-card {
+      min-height: 120px;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(255, 249, 239, 0.8);
+    }
+
+    .logo-card img {
+      max-height: 44px;
+      width: auto;
+      filter: grayscale(1) contrast(1.1);
+      opacity: 0.82;
+      transition: filter 220ms var(--ease), opacity 220ms var(--ease);
+    }
+
+    .logo-card:hover img {
+      filter: none;
+      opacity: 1;
+    }
+
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .blog-visual {
+      border-radius: 20px;
+      overflow: hidden;
+      aspect-ratio: 16 / 10;
+      margin-bottom: 16px;
+    }
+
+    .blog-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.98fr);
+      gap: 18px;
+    }
+
+    .contact-list {
+      list-style: none;
+      padding: 0;
+      margin: 22px 0 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .contact-list li {
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .contact-list li::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      margin-top: 8px;
+      border-radius: 50%;
+      background: var(--clay);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .form-grid input,
+    .form-grid textarea,
+    .form-grid select {
+      width: 100%;
+      min-height: 52px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(25, 48, 40, 0.12);
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease), transform 200ms var(--ease);
+    }
+
+    .form-grid textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-grid input:focus,
+    .form-grid textarea:focus,
+    .form-grid select:focus {
+      border-color: rgba(40, 73, 58, 0.28);
+      box-shadow: 0 0 0 4px rgba(40, 73, 58, 0.08);
+      transform: translateY(-1px);
+    }
+
+    footer {
+      padding: 32px 0 60px;
+      color: var(--ink-soft);
+      font-size: 0.88rem;
+    }
+
+    .footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 20px;
+    }
+
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(26px) rotate(0.4deg);
+      transition: opacity 700ms var(--ease), transform 700ms var(--ease);
+    }
+
+    [data-reveal].visible {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg);
+    }
+
+    @keyframes floatCard {
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    @keyframes floatBadge {
+      0%,
+      100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-10px) rotate(3deg);
+      }
+    }
+
+    @media (max-width: 1140px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero-grid,
+      .split-grid,
+      .product-stage,
+      .value-grid,
+      .trust-grid,
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-aside {
+        min-height: 660px;
+      }
+
+      .hero-footer,
+      .category-grid,
+      .quote-grid,
+      .blog-grid,
+      .logo-grid,
+      .gallery-grid,
+      .application-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .gallery-card.large {
+        grid-row: auto;
+        min-height: 320px;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .site-header .container,
+      .footer-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .hero-frame {
+        padding: 22px;
+      }
+
+      .hero-title {
+        max-width: 100%;
+      }
+
+      .hero-footer,
+      .category-grid,
+      .quote-grid,
+      .blog-grid,
+      .logo-grid,
+      .application-grid,
+      .gallery-grid,
+      .infrastructure-stack,
+      .product-card {
+        grid-template-columns: 1fr;
+      }
+
+      .collage-main,
+      .collage-top,
+      .collage-bottom,
+      .hero-note,
+      .orb-badge {
+        position: relative;
+        width: 100%;
+        left: auto;
+        right: auto;
+        top: auto;
+        bottom: auto;
+        transform: none;
+      }
+
+      .hero-aside {
+        min-height: auto;
+        display: grid;
+        gap: 16px;
+      }
+
+      .collage-main,
+      .collage-top,
+      .collage-bottom {
+        height: 260px;
+      }
+
+      .hero-note {
+        width: 100%;
+      }
+
+      .orb-badge {
+        border-radius: 28px;
+        height: auto;
+        min-height: 110px;
+      }
+
+      .infra-main {
+        min-height: 320px;
+      }
+
+      .infra-side {
+        grid-template-rows: 220px 220px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      [data-reveal] {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="#top" aria-label="Radiatech Electra homepage concept B">
+        <span class="brand-mark">RE</span>
+        <span class="brand-copy">
+          <strong>Radiatech Electra</strong>
+          <span>Material-led concept</span>
+        </span>
+      </a>
+
+      <nav class="nav-links" aria-label="Prototype sections">
+        <a href="#story">Story</a>
+        <a href="#range">Range</a>
+        <a href="#applications">Applications</a>
+        <a href="#projects">Projects</a>
+        <a href="#trust">Trust</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <span class="chip">Noida • Ghaziabad • PAN India</span>
+        <a class="button-secondary" href="tel:+919457893678">+91 9457893678</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero section-tight" id="top">
+      <div class="container">
+        <div class="hero-frame">
+          <div class="hero-grid">
+            <div class="hero-copy" data-reveal>
+              <span class="hero-kicker">Concept B • Editorial Flow</span>
+              <div class="hero-tags">
+                <span class="chip">Trusted by 300+ businesses</span>
+                <span class="chip">4.0 IndiaMART rating</span>
+                <span class="chip">Since 2021</span>
+              </div>
+
+              <h1 class="hero-title">PPR-C systems with a <span>calmer, more premium</span> industrial voice.</h1>
+              <p class="hero-summary">
+                This direction frames Radiatech Electra as a refined infrastructure brand. Instead of dark technical density,
+                it leans into paper tones, editorial hierarchy, and a more human procurement experience while still carrying the same industrial credibility.
+              </p>
+
+              <ul class="hero-points">
+                <li>Manufacturer and supplier of PPR-C pipes, fittings, and industrial piping services for process and manufacturing environments.</li>
+                <li>Suitable for hot and cold water, chemical lines, cooling towers, compressed air, vacuum, and utility infrastructure.</li>
+                <li>Focused on durability, clean routing, standards alignment, and commercial confidence without visual clutter.</li>
+              </ul>
+
+              <div class="button-row">
+                <a class="button" href="#range">Browse the range</a>
+                <a class="button-secondary" href="#contact">Request a quote</a>
+                <a class="button-secondary" href="https://wa.me/919457893678" target="_blank" rel="noopener noreferrer">WhatsApp enquiry</a>
+              </div>
+
+              <div class="hero-footer">
+                <article class="metric-card">
+                  <span>Experience</span>
+                  <strong>5+</strong>
+                  <p>Years in industrial piping and application-led supply.</p>
+                </article>
+                <article class="metric-card">
+                  <span>Projects</span>
+                  <strong>1000+</strong>
+                  <p>Installations and deliveries across plant and utility environments.</p>
+                </article>
+                <article class="metric-card">
+                  <span>Clients</span>
+                  <strong>300+</strong>
+                  <p>Manufacturing and process businesses served nationwide.</p>
+                </article>
+                <article class="metric-card">
+                  <span>Service life</span>
+                  <strong>50+</strong>
+                  <p>Years of product life positioning for long-horizon infrastructure.</p>
+                </article>
+              </div>
+            </div>
+
+            <div class="hero-aside" data-reveal>
+              <div class="collage-main">
+                <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.20%20PM.jpeg" alt="Industrial Radiatech installation" />
+              </div>
+              <div class="collage-top">
+                <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.27%20PM.jpeg" alt="PPR-C pipe manufacturing detail" />
+              </div>
+              <div class="collage-bottom">
+                <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.24%20PM.jpeg" alt="Piping infrastructure installation" />
+              </div>
+
+              <article class="hero-note">
+                <strong>Made for selection meetings, not just scrolling.</strong>
+                <p>This concept uses softer materials and stronger editorial hierarchy to make technical content easier to absorb for procurement teams and decision-makers.</p>
+              </article>
+
+              <div class="orb-badge">
+                <div>
+                  <strong>DIN</strong>
+                  <span>16962 focus</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="story">
+      <div class="container split-grid">
+        <div class="paper-card manifesto" data-reveal>
+          <span class="eyebrow">Brand story</span>
+          <h2>A manufacturer positioned more like a trusted infrastructure house.</h2>
+          <p>
+            Radiatech Electra Private Limited specializes in PPR-C pipes and fittings for industrial water, air, and chemical systems.
+            This homepage direction treats the company as a composed, serious supplier that values standards, clarity, and long-term system performance.
+          </p>
+          <p>
+            The content stays grounded in the actual business: industrial PPR-C piping systems, pipeline installation and lining,
+            process equipment solutions, compressed air piping, chemical line installation, and cooling tower piping.
+          </p>
+          <div class="signature-line">
+            <span>Mission: safer and more sustainable piping systems</span>
+            <span>Vision: nationwide trust in PPR-C supply</span>
+            <span>ISO quality standards</span>
+            <span>IndiaMART TrustSEAL aligned</span>
+          </div>
+        </div>
+
+        <div class="infrastructure-stack" data-reveal>
+          <div class="infra-main">
+            <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.21%20PM.jpeg" alt="Radiatech facility and piping project" />
+            <div class="infra-caption">
+              <strong>State-of-the-art manufacturing facility</strong>
+              <p>Modern machinery, trained workforce, quality testing, and warehouse support positioned as proof rather than sidebar information.</p>
+            </div>
+          </div>
+          <div class="infra-side">
+            <div class="infra-top">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.25%20PM.jpeg" alt="Quality testing and support infrastructure" />
+            </div>
+            <div class="infra-bottom paper-card">
+              <div class="manifesto" style="height: 100%; justify-content: center;">
+                <span class="eyebrow">Infrastructure</span>
+                <h3>Operational strengths</h3>
+                <p>Modern machinery and equipment, skilled workforce, quality testing unit, large warehouse and storage, efficient packaging and delivery.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="range">
+      <div class="container">
+        <div class="section-head center" data-reveal>
+          <span class="eyebrow">Product range</span>
+          <h2>Six catalog families, treated like curated collections.</h2>
+          <p class="lede">The product architecture is the same as the live site, but the presentation is softer and more editorial than dashboard-like.</p>
+        </div>
+
+        <div class="category-grid">
+          <article class="category-card" data-reveal>
+            <span class="category-index">01</span>
+            <h3>PPR Pipes</h3>
+            <p>Premium PPR-C pipe systems with UV stabilized outer layers, anti-microbial inner layers, and temperature resistance up to 95°C.</p>
+            <div class="meta-row">
+              <span>16-315 mm</span>
+              <span>PN 6-20</span>
+            </div>
+          </article>
+          <article class="category-card" data-reveal>
+            <span class="category-index">02</span>
+            <h3>PPR Pipe Fittings</h3>
+            <p>Tees, elbows, couplers, clamps, and reducers designed for leak-proof fusion-welded routing.</p>
+            <div class="meta-row">
+              <span>5 products</span>
+              <span>Fusion ready</span>
+            </div>
+          </article>
+          <article class="category-card" data-reveal>
+            <span class="category-index">03</span>
+            <h3>PPRC Fittings</h3>
+            <p>Couplers, flanges, reducers, and specialized fitting components for large-format industrial systems.</p>
+            <div class="meta-row">
+              <span>7 products</span>
+              <span>Construction use</span>
+            </div>
+          </article>
+          <article class="category-card" data-reveal>
+            <span class="category-index">04</span>
+            <h3>Pipes &amp; Fittings</h3>
+            <p>Integrated piping packages for water supply, process cooling, and chemical service environments.</p>
+            <div class="meta-row">
+              <span>2 groups</span>
+              <span>Integrated systems</span>
+            </div>
+          </article>
+          <article class="category-card" data-reveal>
+            <span class="category-index">05</span>
+            <h3>Compressed Air Pipe Fittings</h3>
+            <p>Specialized routing solutions for compressed air, nitrogen air, oxygen air, and vacuum applications.</p>
+            <div class="meta-row">
+              <span>Air lines</span>
+              <span>Vacuum</span>
+            </div>
+          </article>
+          <article class="category-card" data-reveal>
+            <span class="category-index">06</span>
+            <h3>Industrial Piping Services</h3>
+            <p>Installation, maintenance, and planning support for manufacturing and process units across India.</p>
+            <div class="meta-row">
+              <span>Turnkey delivery</span>
+              <span>Site support</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-tight">
+      <div class="container product-stage">
+        <div class="product-stack" data-reveal>
+          <div class="section-head" style="margin-bottom: 4px;">
+            <span class="eyebrow">New arrivals</span>
+            <h2>Fresh from the product desk.</h2>
+          </div>
+
+          <article class="product-card">
+            <div class="product-image">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.25%20PM.jpeg" alt="PPRC ball valve" />
+            </div>
+            <div>
+              <span class="product-mark">New arrival</span>
+              <h3>PPRC Ball Valve</h3>
+              <p>Flow control component with full bore design for reduced restriction and more confident system operation.</p>
+              <div class="meta-row">
+                <span>Manual</span>
+                <span>Flow control</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-image">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.20%20PM.jpeg" alt="MTA male threaded adaptor" />
+            </div>
+            <div>
+              <span class="product-mark">New arrival</span>
+              <h3>MTA Male Threaded Adaptor</h3>
+              <p>Transition piece for connecting PPRC piping to threaded metal components and equipment interfaces.</p>
+              <div class="meta-row">
+                <span>PPRC + brass</span>
+                <span>Adaptor</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-image">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.20%20PM%20%281%29.jpeg" alt="PPRC FTA 50" />
+            </div>
+            <div>
+              <span class="product-mark">New arrival</span>
+              <h3>PPRC FTA 50</h3>
+              <p>Female threaded adaptor for dependable hybrid connections in industrial service lines and equipment loops.</p>
+              <div class="meta-row">
+                <span>50 mm</span>
+                <span>Threaded interface</span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="feature-list" data-reveal>
+          <div class="section-head" style="margin-bottom: 4px;">
+            <span class="eyebrow">Featured products</span>
+            <h2>High-demand essentials.</h2>
+          </div>
+
+          <article class="paper-card" style="padding: 24px;">
+            <h3>Fusion PPR Pipes</h3>
+            <p>Industrial and commercial pipe range for heat, chemical, and utility systems with long service life.</p>
+            <div class="meta-row">
+              <span>Hot/cold water</span>
+              <span>DIN 16962</span>
+            </div>
+          </article>
+
+          <article class="paper-card" style="padding: 24px;">
+            <h3>Fusion PPR Pipe PN 16 Waterline Special</h3>
+            <p>Clean-water oriented solution with anti-microbial inner layer and UV stabilized outer protection.</p>
+            <div class="meta-row">
+              <span>PN 16</span>
+              <span>Waterline special</span>
+            </div>
+          </article>
+
+          <article class="paper-card" style="padding: 24px;">
+            <h3>Green Therm PPR Pipes</h3>
+            <p>Enhanced thermal performance for solar water heating, process cooling, and hot water supply applications.</p>
+            <div class="meta-row">
+              <span>Green therm</span>
+              <span>UV stabilized</span>
+            </div>
+          </article>
+
+          <article class="paper-card" style="padding: 24px;">
+            <h3>Industrial Piping Work for Air, Chemical, and Vacuum Lines</h3>
+            <p>Turnkey installation offering for industrial piping environments that need planning and execution support together.</p>
+            <div class="meta-row">
+              <span>Turnkey</span>
+              <span>Plant-ready</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="applications">
+      <div class="container value-grid">
+        <div class="value-column" data-reveal>
+          <article class="value-card">
+            <span class="eyebrow">Why choose us</span>
+            <h3>Quality, delivery, pricing, experience, supply reach, and product life are the six commercial pillars.</h3>
+            <p>The same business logic from the current homepage is kept here, but translated into a more premium, considered reading experience.</p>
+            <div class="meta-row">
+              <span>ISO quality standards</span>
+              <span>On-time delivery</span>
+              <span>PAN India supply</span>
+              <span>50+ year positioning</span>
+            </div>
+          </article>
+
+          <article class="paper-card timeline-shell">
+            <div class="section-head" style="margin-bottom: 10px;">
+              <span class="eyebrow">Work process</span>
+              <h2>Four calm steps.</h2>
+            </div>
+
+            <div class="timeline-list">
+              <article class="timeline-card" data-reveal>
+                <span class="timeline-step">1</span>
+                <h3>Consultation</h3>
+                <p>Discuss project scope, material type, size range, temperature, and site requirements.</p>
+              </article>
+              <article class="timeline-card" data-reveal>
+                <span class="timeline-step">2</span>
+                <h3>Design and planning</h3>
+                <p>Engineer a routing and fitting strategy around plant reality instead of generic product selection.</p>
+              </article>
+              <article class="timeline-card" data-reveal>
+                <span class="timeline-step">3</span>
+                <h3>Manufacturing</h3>
+                <p>Produce, stage, and prepare products according to standard, application, and dispatch timing.</p>
+              </article>
+              <article class="timeline-card" data-reveal>
+                <span class="timeline-step">4</span>
+                <h3>Delivery and installation</h3>
+                <p>Support actual site execution, delivery coordination, and fit-for-purpose system rollout.</p>
+              </article>
+            </div>
+          </article>
+        </div>
+
+        <div class="application-column">
+          <div class="section-head" data-reveal>
+            <span class="eyebrow">Fields of application</span>
+            <h2>Where the system works hardest.</h2>
+          </div>
+
+          <div class="application-grid">
+            <article class="application-card" data-reveal>
+              <h3>Hot and cold water supply</h3>
+              <p>Stable performance for temperature-managed industrial utility systems.</p>
+              <ul>
+                <li>Chilling plants</li>
+                <li>Process cooling lines</li>
+                <li>Cooling towers</li>
+                <li>Data center cooling</li>
+              </ul>
+            </article>
+            <article class="application-card" data-reveal>
+              <h3>Clean water supply</h3>
+              <p>Hygiene-sensitive networks where water quality and long life must coexist.</p>
+              <ul>
+                <li>Drinking water</li>
+                <li>Plumbing application</li>
+                <li>DM water lines</li>
+                <li>Solar water heaters</li>
+              </ul>
+            </article>
+            <article class="application-card" data-reveal>
+              <h3>Chemical supply</h3>
+              <p>Systems positioned for treatment, process, and corrosive utility environments.</p>
+              <ul>
+                <li>Chemical plants</li>
+                <li>Effluent treatment</li>
+                <li>Sewage treatment</li>
+                <li>Water treatment</li>
+              </ul>
+            </article>
+            <article class="application-card" data-reveal>
+              <h3>Air applications</h3>
+              <p>Compressed and specialty gas routing for plant-wide utility performance.</p>
+              <ul>
+                <li>Compressed air</li>
+                <li>Nitrogen air</li>
+                <li>Oxygen air</li>
+                <li>Vacuum line</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="projects">
+      <div class="container">
+        <div class="section-head center" data-reveal>
+          <span class="eyebrow">Projects</span>
+          <h2>Imagery arranged like a print spread.</h2>
+          <p class="lede">This is the same project evidence reframed with lighter materials, deeper whitespace, and an editorial collage rhythm.</p>
+        </div>
+
+        <div class="gallery-grid">
+          <article class="gallery-card large" data-reveal>
+            <div class="gallery-image">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.21%20PM.jpeg" alt="Cooling tower piping installation" />
+              <div class="gallery-copy">
+                <span class="eyebrow">Project 01</span>
+                <h3>Cooling tower piping installation</h3>
+                <p>Large-format hero project for plants that need thermal reliability and clean maintenance access.</p>
+              </div>
+            </div>
+          </article>
+          <article class="gallery-card" data-reveal>
+            <div class="gallery-image">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.20%20PM%20%281%29.jpeg" alt="Industrial PPR-C pipeline system" />
+              <div class="gallery-copy">
+                <span class="eyebrow">Project 02</span>
+                <h3>Industrial PPR-C pipeline system</h3>
+                <p>Clean mechanical routing and joint discipline.</p>
+              </div>
+            </div>
+          </article>
+          <article class="gallery-card" data-reveal>
+            <div class="gallery-image">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.20%20PM%20%282%29.jpeg" alt="Process plant piping network" />
+              <div class="gallery-copy">
+                <span class="eyebrow">Project 03</span>
+                <h3>Process plant piping network</h3>
+                <p>Fluid-handling infrastructure built for clarity.</p>
+              </div>
+            </div>
+          </article>
+          <article class="gallery-card" data-reveal>
+            <div class="gallery-image">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.24%20PM.jpeg" alt="Pump room piping installation" />
+              <div class="gallery-copy">
+                <span class="eyebrow">Project 04</span>
+                <h3>Pump room installation</h3>
+                <p>Compact utility routing in equipment-dense zones.</p>
+              </div>
+            </div>
+          </article>
+          <article class="gallery-card" data-reveal>
+            <div class="gallery-image">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.28%20PM.jpeg" alt="Factory pipeline installation" />
+              <div class="gallery-copy">
+                <span class="eyebrow">Project 05</span>
+                <h3>Factory pipeline installation</h3>
+                <p>Infrastructure that reads as deliberate rather than improvised.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="trust">
+      <div class="container">
+        <div class="section-head center" data-reveal>
+          <span class="eyebrow">Trust signals</span>
+          <h2>Reviews and client logos, handled with restraint.</h2>
+          <p class="lede">This version replaces the heavy social-proof treatment with a cleaner, higher-end composition.</p>
+        </div>
+
+        <div class="trust-grid">
+          <aside class="rating-card" data-reveal>
+            <span class="eyebrow">IndiaMART score</span>
+            <strong>4.0</strong>
+            <div class="stars" aria-label="4 out of 5 stars">★ ★ ★ ★ ☆</div>
+            <p>12 total reviews. Strong quality and delivery perception presented in a quieter, more premium block.</p>
+            <div class="score-row">
+              <div class="score">
+                <span><b>Quality</b><b>100%</b></span>
+                <div class="score-bar"><i style="width: 100%"></i></div>
+              </div>
+              <div class="score">
+                <span><b>Delivery</b><b>100%</b></span>
+                <div class="score-bar"><i style="width: 100%"></i></div>
+              </div>
+              <div class="score">
+                <span><b>Satisfaction</b><b>66%</b></span>
+                <div class="score-bar"><i style="width: 66%"></i></div>
+              </div>
+            </div>
+          </aside>
+
+          <div>
+            <div class="quote-grid">
+              <article class="quote-card" data-reveal>
+                <div class="quote-top">
+                  <div style="display: flex; gap: 12px; align-items: center;">
+                    <span class="quote-id">V</span>
+                    <div>
+                      <strong>Vasim Ansari</strong>
+                      <span>Indore, Madhya Pradesh</span>
+                    </div>
+                  </div>
+                  <span class="quote-stars">★★★★★</span>
+                </div>
+                <p>The card style stays minimal so the proof feels credible and not over-designed.</p>
+                <p class="quote-date">30 Mar 2026 • Category: PPR Pipe</p>
+              </article>
+              <article class="quote-card" data-reveal>
+                <div class="quote-top">
+                  <div style="display: flex; gap: 12px; align-items: center;">
+                    <span class="quote-id">A</span>
+                    <div>
+                      <strong>Abhishek Chauhan</strong>
+                      <span>Noida, Uttar Pradesh</span>
+                    </div>
+                  </div>
+                  <span class="quote-stars">★★★★★</span>
+                </div>
+                <p>Useful if you want the homepage to feel refined enough for larger buyers and consultants.</p>
+                <p class="quote-date">01 Feb 2025</p>
+              </article>
+              <article class="quote-card" data-reveal>
+                <div class="quote-top">
+                  <div style="display: flex; gap: 12px; align-items: center;">
+                    <span class="quote-id">R</span>
+                    <div>
+                      <strong>Rakesh Jain</strong>
+                      <span>New Delhi, Delhi</span>
+                    </div>
+                  </div>
+                  <span class="quote-stars">★★★★★</span>
+                </div>
+                <p>The warm palette helps industrial content feel more premium without becoming soft or vague.</p>
+                <p class="quote-date">29 May 2023</p>
+              </article>
+            </div>
+
+            <div class="logo-grid" data-reveal>
+              <article class="logo-card"><img src="../public/images/clients/aditya%20birla%20hindalko.jpg" alt="Aditya Birla Hindalco" /></article>
+              <article class="logo-card"><img src="../public/images/clients/bajaj%20sugar.png" alt="Bajaj Sugar" /></article>
+              <article class="logo-card"><img src="../public/images/clients/crd%20group.png" alt="CRD Group" /></article>
+              <article class="logo-card"><img src="../public/images/clients/dalima%20bharat.jpg" alt="Dalmia Bharat" /></article>
+              <article class="logo-card"><img src="../public/images/clients/hero.png" alt="Hero" /></article>
+              <article class="logo-card"><img src="../public/images/clients/ibis%20hotel.jpg" alt="IBIS Hotel" /></article>
+              <article class="logo-card"><img src="../public/images/clients/pcbl.png" alt="PCBL" /></article>
+              <article class="logo-card"><img src="../public/images/clients/triveni.jpg" alt="Triveni" /></article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-tight">
+      <div class="container">
+        <div class="section-head center" data-reveal>
+          <span class="eyebrow">Insights</span>
+          <h2>Articles framed like an industry journal.</h2>
+          <p class="lede">This approach makes the content area feel more thoughtful and premium, which can lift perceived expertise.</p>
+        </div>
+
+        <div class="blog-grid">
+          <article class="blog-card" data-reveal>
+            <div class="blog-visual">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.21%20PM.jpeg" alt="PPR-C vs CPVC comparison article" />
+            </div>
+            <span class="eyebrow">15 Dec 2025</span>
+            <h3>PPR-C vs CPVC Pipes for Industrial Use</h3>
+            <p>Comparison-led article styling for buyers evaluating long-term system economics and reliability.</p>
+          </article>
+          <article class="blog-card" data-reveal>
+            <div class="blog-visual">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.20%20PM.jpeg" alt="Benefits of PPR-C pipes article" />
+            </div>
+            <span class="eyebrow">20 Nov 2025</span>
+            <h3>Top Benefits of PPR-C in Industrial Piping</h3>
+            <p>Highlights corrosion resistance, longevity, installation ease, and operating reliability in one compact article card.</p>
+          </article>
+          <article class="blog-card" data-reveal>
+            <div class="blog-visual">
+              <img src="../public/images/projects/WhatsApp%20Image%202026-04-17%20at%2012.17.24%20PM.jpeg" alt="Installation guide article" />
+            </div>
+            <span class="eyebrow">10 Oct 2025</span>
+            <h3>Complete Guide to PPR-C Pipe Installation</h3>
+            <p>Best-practice content for fusion welding, support spacing, routing, and quality assurance.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="container contact-grid">
+        <article class="contact-card" data-reveal>
+          <span class="eyebrow">Final CTA</span>
+          <h3>A warmer option for a more premium first impression.</h3>
+          <p>
+            Choose this direction if you want Radiatech Electra to feel more elevated, more consultative, and slightly less
+            utilitarian while still remaining firmly industrial.
+          </p>
+          <ul class="contact-list">
+            <li>Strong for decision-makers who respond to premium, composed presentation.</li>
+            <li>Better for a brand that wants to look established, intentional, and design-conscious.</li>
+            <li>Still supports the same core homepage information architecture as the current site.</li>
+          </ul>
+          <div class="button-row" style="margin-top: 26px;">
+            <a class="button" href="tel:+919457893678">Call Radiatech</a>
+            <a class="button-secondary" href="https://wa.me/919457893678" target="_blank" rel="noopener noreferrer">Message on WhatsApp</a>
+          </div>
+        </article>
+
+        <article class="contact-card" data-reveal>
+          <span class="eyebrow">Contact information</span>
+          <h3>Radiatech Electra Private Limited</h3>
+          <p>A 287, Basement, Sector-69, Transport Nagar, Noida, Uttar Pradesh - 201301</p>
+          <p style="margin-top: 10px;">Branch office: 206/J9 Akbarpur, Ghaziabad, Uttar Pradesh - 201009</p>
+
+          <form class="form-grid">
+            <input type="text" placeholder="Your name" aria-label="Your name" />
+            <input type="tel" placeholder="Phone number" aria-label="Phone number" />
+            <input type="text" placeholder="Company or plant name" aria-label="Company or plant name" />
+            <select aria-label="Requirement type">
+              <option>Requirement type</option>
+              <option>PPR pipes</option>
+              <option>PPR fittings</option>
+              <option>Industrial piping services</option>
+              <option>Site visit</option>
+            </select>
+            <textarea placeholder="Project scope or quantity requirement" aria-label="Project scope"></textarea>
+            <button class="button" type="button">Send enquiry</button>
+          </form>
+
+          <div class="meta-row" style="margin-top: 18px;">
+            <span>rariatechelectra@gmail.com</span>
+            <span>www.radiatech.in</span>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <span>Homepage Concept B • Editorial Material theme</span>
+      <span>Fonts: Fraunces + Archivo • Motion: reveal + floating collage accents</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var items = document.querySelectorAll("[data-reveal]");
+
+      if (reduceMotion || !("IntersectionObserver" in window)) {
+        items.forEach(function (item) {
+          item.classList.add("visible");
+        });
+        return;
+      }
+
+      var observer = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          threshold: 0.12,
+          rootMargin: "0px 0px -50px 0px"
+        }
+      );
+
+      items.forEach(function (item, index) {
+        item.style.transitionDelay = Math.min(index * 40, 240) + "ms";
+        observer.observe(item);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -35,6 +35,7 @@ export const companyInfo = {
     linkedin: "#",
     youtube: "#",
     instagram: "#",
+    indiamart: "https://www.indiamart.com/radiatechelectra/",
   },
   
   about: {

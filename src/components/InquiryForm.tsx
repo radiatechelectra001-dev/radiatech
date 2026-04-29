@@ -5,10 +5,16 @@ import { useState, FormEvent } from "react";
 interface InquiryFormProps {
   productName?: string;
   compact?: boolean;
+  onDark?: boolean;
+  minimal?: boolean;
 }
 
-export default function InquiryForm({ productName, compact }: InquiryFormProps) {
+export default function InquiryForm({ productName, compact, onDark, minimal }: InquiryFormProps) {
+  const inputClass = onDark
+    ? "w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/30 text-white placeholder-white/70 text-sm focus:ring-2 focus:ring-accent/40 focus:border-accent outline-none transition-all"
+    : "w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all";
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,12 +25,40 @@ export default function InquiryForm({ productName, compact }: InquiryFormProps) 
     quantity: "",
   });
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // In production, this would send to an API endpoint
-    console.log("Inquiry submitted:", formData);
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    setSubmitted(false);
+    setSubmitting(true);
+
+    try {
+      const res = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          message: formData.message,
+          quantity: formData.quantity,
+          productName: formData.product,
+          source: "website",
+        }),
+      });
+
+      if (res.ok) {
+        setSubmitted(true);
+        setFormData({ name: "", email: "", phone: "", company: "", message: "", product: productName || "", quantity: "" });
+        setTimeout(() => setSubmitted(false), 5000);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to send inquiry. Please try again.");
+      }
+    } catch {
+      alert("Failed to send inquiry. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -42,14 +76,49 @@ export default function InquiryForm({ productName, compact }: InquiryFormProps) 
   }
 
   return (
-    <form onSubmit={handleSubmit} className={compact ? "space-y-3" : "space-y-4"}>
+    <form onSubmit={handleSubmit} className={compact || minimal ? "space-y-3" : "space-y-4"}>
       {productName && (
-        <div className="bg-primary/5 border border-primary/10 rounded-lg px-4 py-2.5 text-sm">
-          <span className="text-gray-500">Product: </span>
-          <span className="font-medium text-primary">{productName}</span>
+        <div className={`${onDark ? "bg-white/10 border-white/20 text-white" : "bg-primary/5 border-primary/10 text-gray-500"} border px-4 py-2.5 text-sm`}>
+          <span>Product: </span>
+          <span className={onDark ? "font-medium text-white" : "font-medium text-primary"}>{productName}</span>
         </div>
       )}
       
+      {minimal ? (
+        <>
+          <input
+            type="text"
+            placeholder="Your Name *"
+            required
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className={inputClass}
+          />
+          <input
+            type="tel"
+            placeholder="Phone Number *"
+            required
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            className={inputClass}
+          />
+          <input
+            type="email"
+            placeholder="Email Address (optional)"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className={inputClass}
+          />
+          <textarea
+            placeholder="Message (optional)"
+            rows={3}
+            value={formData.message}
+            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+            className={`${inputClass} resize-none`}
+          />
+        </>
+      ) : (
+        <>
       <div className={compact ? "" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
         <input
           type="text"
@@ -57,7 +126,7 @@ export default function InquiryForm({ productName, compact }: InquiryFormProps) 
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+          className={inputClass}
         />
         {!compact && (
           <input
@@ -66,10 +135,21 @@ export default function InquiryForm({ productName, compact }: InquiryFormProps) 
             required
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+            className={inputClass}
           />
         )}
       </div>
+
+      {compact && (
+        <input
+          type="email"
+          placeholder="Email Address *"
+          required
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          className={inputClass}
+        />
+      )}
       
       <div className={compact ? "" : "grid grid-cols-1 sm:grid-cols-2 gap-4"}>
         <input
@@ -78,7 +158,7 @@ export default function InquiryForm({ productName, compact }: InquiryFormProps) 
           required
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+          className={inputClass}
         />
         {!compact && (
           <input
@@ -86,7 +166,7 @@ export default function InquiryForm({ productName, compact }: InquiryFormProps) 
             placeholder="Company Name"
             value={formData.company}
             onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+            className={inputClass}
           />
         )}
       </div>
@@ -97,7 +177,7 @@ export default function InquiryForm({ productName, compact }: InquiryFormProps) 
           placeholder="Required Quantity"
           value={formData.quantity}
           onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+          className={inputClass}
         />
       )}
 
@@ -107,17 +187,20 @@ export default function InquiryForm({ productName, compact }: InquiryFormProps) 
         rows={compact ? 3 : 4}
         value={formData.message}
         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-        className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
+        className={`${inputClass} resize-none`}
       />
+        </>
+      )}
 
       <button
         type="submit"
-        className="w-full bg-accent hover:bg-accent-dark text-white py-3 rounded-lg text-sm font-semibold transition-colors shadow-lg shadow-accent/20"
+        disabled={submitting}
+        className={`w-full bg-accent hover:bg-accent-dark text-white py-3 ${onDark ? "" : "rounded-lg"} text-sm font-semibold transition-colors shadow-lg shadow-accent/20 disabled:cursor-not-allowed disabled:opacity-70`}
       >
-        {compact ? "Send Inquiry" : "Submit Inquiry"}
+        {submitting ? "Sending..." : compact || minimal ? "Send Inquiry" : "Submit Inquiry"}
       </button>
 
-      {!compact && (
+      {!compact && !minimal && (
         <p className="text-xs text-gray-400 text-center">
           Or contact us directly on{" "}
           <a href={`https://wa.me/919457893678`} className="text-green font-medium hover:underline">

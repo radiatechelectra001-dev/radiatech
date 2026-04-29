@@ -21,6 +21,7 @@ const navLinks = [
       { label: "Industrial Piping Services", href: "/products/industrial-piping-services" },
     ],
   },
+  { label: "Catalogue", href: "/catalogue" },
   { label: "Infrastructure", href: "/infrastructure" },
   { label: "Clients", href: "/clients" },
   { label: "Blogs", href: "/blogs" },
@@ -34,23 +35,23 @@ export default function Navbar() {
   return (
     <>
       {/* Top Bar */}
-      <div className="bg-primary text-white text-sm">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center gap-2">
-          <div className="flex items-center gap-4 flex-wrap">
-            <span className="flex items-center gap-1">
+      <div className="bg-primary text-white text-xs sm:text-sm">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 sm:gap-4 flex-nowrap overflow-x-auto whitespace-nowrap scrollbar-none min-w-0">
+            <span className="flex items-center gap-1 shrink-0">
               <MapPin size={14} />
               Noida, Uttar Pradesh, India
             </span>
-            <a href={`tel:${companyInfo.contact.phone}`} className="flex items-center gap-1 hover:text-accent transition-colors">
+            <a href={`tel:${companyInfo.contact.phone}`} className="flex items-center gap-1 hover:text-accent transition-colors shrink-0">
               <Phone size={14} />
               {companyInfo.contact.phone}
             </a>
-            <a href={`mailto:${companyInfo.contact.email}`} className="flex items-center gap-1 hover:text-accent transition-colors hidden sm:flex">
+            <a href={`mailto:${companyInfo.contact.email}`} className="hidden sm:flex items-center gap-1 hover:text-accent transition-colors shrink-0">
               <Mail size={14} />
               {companyInfo.contact.email}
             </a>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-3 shrink-0">
             {["facebook", "twitter", "instagram", "youtube"].map((s) => (
               <a key={s} href={companyInfo.social[s as keyof typeof companyInfo.social]} className="hover:text-accent transition-colors" aria-label={s}>
                 <SocialIcon name={s} />

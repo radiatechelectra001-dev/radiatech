@@ -1,46 +1,62 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, ArrowRight } from "lucide-react";
-import { blogPosts } from "@/data/blogs";
+import { Calendar, ArrowRight, User } from "lucide-react";
+import { prisma } from "@/lib/db";
 
 export const metadata = {
-  title: "Blog - Radiatech Electra",
-  description: "Industry insights, guides, and updates on PPR-C piping solutions.",
+  title: "Blog & Insights - Radiatech Electra",
+  description: "Industry insights, technical guides, and the latest updates on PPR-C piping solutions from Radiatech Electra.",
 };
 
-export default function BlogsPage() {
+export const revalidate = 60;
+
+export default async function BlogsPage() {
+  const blogs = await prisma.blogPost.findMany({
+    where: { isPublished: true },
+    orderBy: { createdAt: "desc" },
+  });
+
   return (
     <main>
       <section className="bg-gradient-to-r from-primary-dark to-primary py-16">
         <div className="max-w-7xl mx-auto px-4 text-white">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4">Blog & Insights</h1>
-          <p className="text-blue-200 text-lg max-w-2xl">Industry insights, technical guides, and company updates.</p>
+          <p className="text-blue-200 text-lg max-w-2xl">Industry insights, technical guides, and company updates on PPR-C piping solutions.</p>
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((blog) => (
-              <Link key={blog.slug} href={`/blogs/${blog.slug}`} className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100">
-                <div className="relative h-52 overflow-hidden">
-                  <Image src={blog.image} alt={blog.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute top-3 left-3"><span className="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">{blog.tags[0]}</span></div>
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center gap-2 text-gray-500 text-xs mb-3">
-                    <Calendar size={14} />
-                    <span>{blog.date}</span>
-                    <span>•</span>
-                    <span>By {blog.author}</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-primary transition-colors">{blog.title}</h3>
-                  <p className="text-gray-600 text-sm line-clamp-2 mb-4">{blog.excerpt}</p>
-                  <span className="inline-flex items-center gap-1 text-primary text-sm font-semibold group-hover:gap-2 transition-all">Read More <ArrowRight size={16} /></span>
-                </div>
-              </Link>
-            ))}
-          </div>
+      <section className="py-12 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          {blogs.length === 0 ? (
+            <div className="text-center py-12 sm:py-20"><p className="text-gray-400 text-lg">No blog posts published yet. Check back soon!</p></div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
+              {blogs.map((blog) => {
+                const tags: string[] = (() => { try { return JSON.parse(blog.tags); } catch { return []; } })();
+                return (
+                  <Link key={blog.id} href={`/blogs/${blog.slug}`} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100">
+                    <div className="relative h-52 overflow-hidden bg-gray-100">
+                      {blog.coverImage ? (
+                        <Image src={blog.coverImage} alt={blog.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10"><span className="text-5xl">📝</span></div>
+                      )}
+                      {tags[0] && <div className="absolute top-3 left-3"><span className="bg-primary text-white text-xs font-bold px-3 py-1">{tags[0]}</span></div>}
+                    </div>
+                    <div className="p-5">
+                      <div className="flex flex-wrap items-center gap-3 text-gray-500 text-xs mb-3">
+                        <span className="flex items-center gap-1"><Calendar size={14} />{new Date(blog.publishedAt || blog.createdAt).toLocaleDateString("en-IN", { month: "long", day: "numeric", year: "numeric" })}</span>
+                        <span className="flex items-center gap-1"><User size={14} />{blog.author}</span>
+                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-primary transition-colors line-clamp-2">{blog.title}</h3>
+                      <p className="text-gray-600 text-sm line-clamp-2 mb-4">{blog.excerpt}</p>
+                      <span className="inline-flex items-center gap-1 text-primary text-sm font-semibold group-hover:gap-2 transition-all">Read More <ArrowRight size={16} /></span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </main>

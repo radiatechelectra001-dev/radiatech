@@ -7,6 +7,7 @@ export interface Product {
   specifications?: Record<string, string>;
   applications?: string[];
   image: string;
+  images?: string[];
   isNewArrival?: boolean;
 }
 
