@@ -1,20 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, ArrowRight, User } from "lucide-react";
-import { prisma } from "@/lib/db";
+import { getPublishedBlogs, parseBlogTags } from "@/lib/publicBlogs";
 
 export const metadata = {
   title: "Blog & Insights - Radiatech Electra",
   description: "Industry insights, technical guides, and the latest updates on PPR-C piping solutions from Radiatech Electra.",
 };
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function BlogsPage() {
-  const blogs = await prisma.blogPost.findMany({
-    where: { isPublished: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const blogs = await getPublishedBlogs();
 
   return (
     <main>
@@ -32,7 +29,7 @@ export default async function BlogsPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
               {blogs.map((blog) => {
-                const tags: string[] = (() => { try { return JSON.parse(blog.tags); } catch { return []; } })();
+                const tags = parseBlogTags(blog.tags);
                 return (
                   <Link key={blog.id} href={`/blogs/${blog.slug}`} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100">
                     <div className="relative h-52 overflow-hidden bg-gray-100">

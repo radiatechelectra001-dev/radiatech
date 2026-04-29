@@ -2,13 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calendar, ArrowLeft, User, Tag } from "lucide-react";
-import { prisma } from "@/lib/db";
+import { getPublishedBlogBySlug, getRelatedBlogs, parseBlogTags } from "@/lib/publicBlogs";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const blog = await prisma.blogPost.findFirst({ where: { slug, isPublished: true } });
+  const blog = await getPublishedBlogBySlug(slug);
   if (!blog) return { title: "Blog - Radiatech Electra" };
   return {
     title: `${blog.title} - Radiatech Electra`,
@@ -19,17 +19,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const blog = await prisma.blogPost.findFirst({ where: { slug, isPublished: true } });
+  const blog = await getPublishedBlogBySlug(slug);
   if (!blog) notFound();
 
-  const tags: string[] = (() => { try { return JSON.parse(blog.tags); } catch { return []; } })();
+  const tags = parseBlogTags(blog.tags);
 
-  // Fetch related blogs (same tags, exclude current)
-  const relatedBlogs = await prisma.blogPost.findMany({
-    where: { isPublished: true, id: { not: blog.id } },
-    orderBy: { createdAt: "desc" },
-    take: 3,
-  });
+  const relatedBlogs = await getRelatedBlogs(blog.slug, blog.id, 3);
 
   return (
     <main>
