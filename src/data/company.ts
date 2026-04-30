@@ -12,7 +12,7 @@ export const companyInfo = {
   totalReviews: 12,
   
   contact: {
-    email: "rariatechelectra@gmail.com",
+    email: "radiatechelectra@gmail.com",
     phone: "+91 81788 50959",
     phoneHref: "+918178850959",
     whatsapp: "918178850959",
