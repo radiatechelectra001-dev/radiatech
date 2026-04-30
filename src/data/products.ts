@@ -23,7 +23,7 @@ export const categories: ProductCategory[] = [
   {
     slug: "ppr-pipes",
     name: "PPR Pipes",
-    description: "Premium quality PPR-C pipes available in sizes from 20MM to 615 mm with pressure ratings from PN 6 to PN 20. DIN 16962 compliant with UV stabilized outer layer and anti-microbial inner layer.",
+    description: "Premium quality PPR-C pipes available in sizes from 20MM to 615 MM with pressure ratings from PN 6 to PN 20. DIN 16962 compliant with UV stabilized outer layer and anti-microbial inner layer.",
     image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg",
     productCount: 4,
   },
@@ -74,7 +74,7 @@ export const products: Product[] = [
     description: "High-quality Fusion PPR pipes designed for industrial and commercial applications. Available in multiple sizes with excellent heat and chemical resistance. UV stabilized outer layer ensures long-term durability even in exposed installations.",
     specifications: {
       "Material": "PPR-C (Polypropylene Random Copolymer Type 3)",
-      "Size Range": "20MM to 615 mm",
+      "Size Range": "20MM to 615 MM",
       "Pressure Rating": "PN 6 to PN 20",
       "Standard": "DIN 16962",
       "Temperature Range": "Up to 95°C",

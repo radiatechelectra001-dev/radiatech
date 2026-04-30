@@ -140,7 +140,10 @@ html {
   width: 100%;
   border: 1px solid var(--gray-200);
   background: #ffffff;
-  padding: 0.625rem 1rem;
+  padding-top: 0.625rem;
+  padding-right: 1rem;
+  padding-bottom: 0.625rem;
+  padding-left: 1rem;
   font-size: 0.875rem;
   color: var(--gray-900);
   outline: none;
