@@ -49,7 +49,7 @@ export default function CataloguePage() {
             </div>
             <div className="flex flex-wrap gap-3 shrink-0">
               <a
-                href="/RADIATECH%20BROCHURE%20PIPE_.pdf"
+                href="/RADIATECH-BROCHURE-PIPE.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark"
@@ -57,7 +57,7 @@ export default function CataloguePage() {
                 <ExternalLink size={15} /> Open Brochure
               </a>
               <a
-                href="/RADIATECH%20BROCHURE%20PIPE_.pdf"
+                href="/RADIATECH-BROCHURE-PIPE.pdf"
                 download="Radiatech-Brochure.pdf"
                 className="inline-flex items-center gap-2 border border-primary/30 bg-primary/5 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
               >
@@ -66,11 +66,11 @@ export default function CataloguePage() {
             </div>
           </div>
           <div className="h-[72vh] min-h-[520px] overflow-hidden border border-gray-200 bg-white shadow-sm">
-            <iframe src="/RADIATECH%20BROCHURE%20PIPE_.pdf#view=FitH" title="Radiatech Pipe & Fittings Brochure" className="h-full w-full" />
+            <iframe src="/RADIATECH-BROCHURE-PIPE.pdf#view=FitH" title="Radiatech Pipe & Fittings Brochure" className="h-full w-full" />
           </div>
           <p className="mt-4 text-center text-sm text-gray-500">
             If the brochure does not load,{" "}
-            <a href="/RADIATECH%20BROCHURE%20PIPE_.pdf" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold hover:underline">open it in a new tab</a>.
+            <a href="/RADIATECH-BROCHURE-PIPE.pdf" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold hover:underline">open it in a new tab</a>.
           </p>
         </div>
       </section>
