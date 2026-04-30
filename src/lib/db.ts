@@ -10,7 +10,7 @@ function createPrismaClient() {
 		throw new Error("DATABASE_URL is required");
 	}
 
-	const adapter = new PrismaPg({ connectionString });
+	const adapter = new PrismaPg({ connectionString, ssl: { rejectUnauthorized: false } });
 	return new PrismaClient({ adapter });
 }
 
