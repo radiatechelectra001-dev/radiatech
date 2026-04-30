@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Edit3, Plus, Trash2, X } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/ImageUpload";
@@ -22,28 +22,53 @@ export default function AdminCategoriesPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      const auth = await fetch("/api/auth/me");
-      if (auth.status === 401) {
-        router.replace("/admin/login");
-        return;
-      }
-
-      const res = await fetch("/api/categories");
-      if (res.ok) setCategories(await res.json());
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
-
   useEffect(() => {
-    void fetchCategories();
-  }, [fetchCategories]);
+    let cancelled = false;
+
+    async function loadCategories() {
+      try {
+        const auth = await fetch("/api/auth/me");
+        if (auth.status === 401) {
+          router.replace("/admin/login");
+          return;
+        }
+
+        const res = await fetch("/api/categories");
+        const data = (await res.json().catch(() => null)) as Category[] | { error?: unknown } | null;
+        if (cancelled) return;
+
+        if (!res.ok) {
+          setCategories([]);
+          setError(typeof data && data && "error" in data && typeof data.error === "string" ? data.error : "Unable to load categories.");
+          return;
+        }
+
+        setCategories(Array.isArray(data) ? data : []);
+        setError("");
+      } catch {
+        if (!cancelled) {
+          setCategories([]);
+          setError("Unable to load categories.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadCategories();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshKey, router]);
 
   const resetForm = () => {
     setShowForm(false);
@@ -60,7 +85,8 @@ export default function AdminCategoriesPage() {
 
     if (res.ok) {
       resetForm();
-      await fetchCategories();
+      setLoading(true);
+      setRefreshKey((current) => current + 1);
       return;
     }
 
@@ -133,6 +159,8 @@ export default function AdminCategoriesPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((item) => <div key={item} className="h-40 animate-pulse border border-slate-200 bg-white" />)}
         </div>
+      ) : error ? (
+        <div className="border border-red-200 bg-red-50 px-5 py-6 text-sm font-medium text-red-700">{error}</div>
       ) : categories.length === 0 ? (
         <div className="border border-dashed border-slate-300 bg-white px-5 py-16 text-center text-sm text-slate-500">No categories yet.</div>
       ) : (

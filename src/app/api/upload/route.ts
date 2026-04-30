@@ -3,6 +3,17 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { getSession } from "@/lib/auth";
 import { uploadToR2, isR2Configured } from "@/lib/r2";
+import { jsonError, logServerError } from "@/lib/api";
+
+function sanitizeFolder(value: string) {
+  const folder = value
+    .split("/")
+    .map((part) => part.replace(/[^a-zA-Z0-9_-]/g, ""))
+    .filter(Boolean)
+    .join("/");
+
+  return folder || "uploads";
+}
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
@@ -11,7 +22,7 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
-    const folder = (formData.get("folder") as string) || "uploads";
+    const folder = sanitizeFolder((formData.get("folder") as string) || "uploads");
 
     if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
@@ -26,10 +37,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File must be under 5MB" }, { status: 400 });
     }
 
-    // Use Cloudflare R2 if configured, otherwise fall back to local storage
     if (isR2Configured()) {
       const url = await uploadToR2(file, folder);
       return NextResponse.json({ url, storage: "r2" });
+    }
+
+    if (process.env.NODE_ENV === "production") {
+      return jsonError("File storage is not configured.", 503);
     }
 
     // Fallback: local file storage (development only)
@@ -50,8 +64,8 @@ export async function POST(req: NextRequest) {
       url: `/images/${folder}/${filename}`,
       storage: "local",
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Upload failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (error) {
+    logServerError("api.upload.POST", error);
+    return jsonError("Upload failed. Please try again.", 500);
   }
 }

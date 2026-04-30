@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError, jsonError, logServerError } from "@/lib/api";
 
 function normalizeTags(value: unknown) {
   if (Array.isArray(value)) return value.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0).map((tag) => tag.trim());
@@ -29,23 +30,29 @@ export async function GET(req: NextRequest) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const where: Record<string, unknown> = {};
-  if (published === "true") where.isPublished = true;
+  try {
+    const where: Record<string, unknown> = {};
+    if (published === "true") where.isPublished = true;
 
-  if (shouldPaginate) {
-    const [items, total] = await prisma.$transaction([
-      prisma.blogPost.findMany({ where, orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),
-      prisma.blogPost.count({ where }),
-    ]);
+    if (shouldPaginate) {
+      const [items, total] = await prisma.$transaction([
+        prisma.blogPost.findMany({ where, orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),
+        prisma.blogPost.count({ where }),
+      ]);
 
-    return NextResponse.json({ items, pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) } });
+      return NextResponse.json({ items, pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) } });
+    }
+
+    const blogs = await prisma.blogPost.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(blogs);
+  } catch (error) {
+    logServerError("api.blogs.GET", error);
+    const status = isDatabaseUnavailableError(error) ? 503 : 500;
+    return jsonError(status === 503 ? DATABASE_UNAVAILABLE_MESSAGE : "Unable to load blog posts.", status);
   }
-
-  const blogs = await prisma.blogPost.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-  });
-  return NextResponse.json(blogs);
 }
 
 export async function POST(req: NextRequest) {
@@ -68,8 +75,9 @@ export async function POST(req: NextRequest) {
       },
     });
     return NextResponse.json(blog, { status: 201 });
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : "Failed to create blog";
-    return NextResponse.json({ error: message }, { status: 400 });
+  } catch (error) {
+    logServerError("api.blogs.POST", error);
+    const status = isDatabaseUnavailableError(error) ? 503 : 400;
+    return jsonError(status === 503 ? DATABASE_UNAVAILABLE_MESSAGE : "Unable to create blog post. Check the fields and try again.", status);
   }
 }

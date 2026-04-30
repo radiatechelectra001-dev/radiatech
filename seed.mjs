@@ -15,9 +15,13 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("🌱 Seeding database...");
 
+  if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
+    throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD are required");
+  }
+
   // Create admin user
   const adminUsers = [
-    { email: process.env.ADMIN_EMAIL || "admin@radiatech.in", password: process.env.ADMIN_PASSWORD || "Radiatech@2026", name: "Admin" },
+    { email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD, name: "Admin" },
     process.env.EXTRA_ADMIN_EMAIL && process.env.EXTRA_ADMIN_PASSWORD
       ? { email: process.env.EXTRA_ADMIN_EMAIL, password: process.env.EXTRA_ADMIN_PASSWORD, name: "Radiatech Admin" }
       : null,

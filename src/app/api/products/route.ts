@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError, jsonError, logServerError } from "@/lib/api";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -19,32 +20,38 @@ export async function GET(req: NextRequest) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const where: Record<string, unknown> = admin ? {} : { isActive: true };
-  if (category) where.category = { slug: category };
-  if (featured === "true") where.isFeatured = true;
-  if (newArrivals === "true") where.isNewArrival = true;
+  try {
+    const where: Record<string, unknown> = admin ? {} : { isActive: true };
+    if (category) where.category = { slug: category };
+    if (featured === "true") where.isFeatured = true;
+    if (newArrivals === "true") where.isNewArrival = true;
 
-  if (shouldPaginate) {
-    const [items, total] = await prisma.$transaction([
-      prisma.product.findMany({
-        where,
-        include: { category: { select: { name: true, slug: true } } },
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-      }),
-      prisma.product.count({ where }),
-    ]);
+    if (shouldPaginate) {
+      const [items, total] = await prisma.$transaction([
+        prisma.product.findMany({
+          where,
+          include: { category: { select: { name: true, slug: true } } },
+          orderBy: { createdAt: "desc" },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        prisma.product.count({ where }),
+      ]);
 
-    return NextResponse.json({ items, pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) } });
+      return NextResponse.json({ items, pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) } });
+    }
+
+    const products = await prisma.product.findMany({
+      where,
+      include: { category: { select: { name: true, slug: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(products);
+  } catch (error) {
+    logServerError("api.products.GET", error);
+    const status = isDatabaseUnavailableError(error) ? 503 : 500;
+    return jsonError(status === 503 ? DATABASE_UNAVAILABLE_MESSAGE : "Unable to load products.", status);
   }
-
-  const products = await prisma.product.findMany({
-    where,
-    include: { category: { select: { name: true, slug: true } } },
-    orderBy: { createdAt: "desc" },
-  });
-  return NextResponse.json(products);
 }
 
 export async function POST(req: NextRequest) {
@@ -70,8 +77,9 @@ export async function POST(req: NextRequest) {
       },
     });
     return NextResponse.json(product, { status: 201 });
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : "Failed to create product";
-    return NextResponse.json({ error: message }, { status: 400 });
+  } catch (error) {
+    logServerError("api.products.POST", error);
+    const status = isDatabaseUnavailableError(error) ? 503 : 400;
+    return jsonError(status === 503 ? DATABASE_UNAVAILABLE_MESSAGE : "Unable to create product. Check the fields and try again.", status);
   }
 }

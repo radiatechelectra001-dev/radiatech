@@ -16,6 +16,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
     : "w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all";
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -29,6 +30,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setSubmitted(false);
+    setErrorMessage(null);
     setSubmitting(true);
 
     try {
@@ -52,11 +54,11 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
         setFormData({ name: "", email: "", phone: "", company: "", message: "", product: productName || "", quantity: "" });
         setTimeout(() => setSubmitted(false), 5000);
       } else {
-        const data = await res.json();
-        alert(data.error || "Failed to send inquiry. Please try again.");
+        const data = (await res.json().catch(() => null)) as { error?: unknown } | null;
+        setErrorMessage(typeof data?.error === "string" ? data.error : "Failed to send inquiry. Please try again.");
       }
     } catch {
-      alert("Failed to send inquiry. Please try again.");
+      setErrorMessage("Failed to send inquiry. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -191,6 +193,12 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
         className={`${inputClass} resize-none`}
       />
         </>
+      )}
+
+      {errorMessage && (
+        <div className={`${onDark ? "border-white/20 bg-white/10 text-white" : "border-red-200 bg-red-50 text-red-700"} border px-4 py-3 text-sm`} role="alert">
+          {errorMessage}
+        </div>
       )}
 
       <button

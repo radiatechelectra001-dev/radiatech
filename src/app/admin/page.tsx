@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BookOpenText, FolderTree, Inbox, Package, TrendingUp } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
 
@@ -28,25 +28,49 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const fetchStats = useCallback(async () => {
-    try {
-      const auth = await fetch("/api/auth/me");
-      if (auth.status === 401) {
-        router.replace("/admin/login");
-        return;
-      }
-
-      const res = await fetch("/api/admin/stats");
-      if (res.ok) setStats(await res.json());
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    void fetchStats();
-  }, [fetchStats]);
+    let cancelled = false;
+
+    async function loadStats() {
+      try {
+        const auth = await fetch("/api/auth/me");
+        if (auth.status === 401) {
+          router.replace("/admin/login");
+          return;
+        }
+
+        const res = await fetch("/api/admin/stats");
+        const data = (await res.json().catch(() => null)) as Stats | { error?: unknown } | null;
+        if (cancelled) return;
+
+        if (!res.ok) {
+          setStats(null);
+          setError(typeof data && data && "error" in data && typeof data.error === "string" ? data.error : "Unable to load dashboard statistics.");
+          return;
+        }
+
+        setStats(data as Stats);
+        setError("");
+      } catch {
+        if (!cancelled) {
+          setStats(null);
+          setError("Unable to load dashboard statistics.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadStats();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   const statCards = [
     { label: "Active Products", value: stats?.products ?? 0, icon: Package, tone: "bg-blue-50 text-primary", href: "/admin/products" },
@@ -71,6 +95,8 @@ export default function AdminDashboard() {
             <div key={item} className="h-32 animate-pulse border border-slate-200 bg-white" />
           ))}
         </div>
+      ) : error ? (
+        <div className="border border-red-200 bg-red-50 px-5 py-6 text-sm font-medium text-red-700">{error}</div>
       ) : (
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

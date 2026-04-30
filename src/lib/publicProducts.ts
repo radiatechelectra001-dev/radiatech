@@ -1,4 +1,5 @@
 import { categories as fallbackCategories, products as fallbackProducts, type Product, type ProductCategory } from "@/data/products";
+import { markPublicDbAvailable, markPublicDbUnavailable, shouldSkipPublicDbRead } from "@/lib/dbHealth";
 
 type PrismaClientInstance = typeof import("@/lib/db")["prisma"];
 
@@ -117,11 +118,17 @@ function withFallbackPrice(product: Product): PublicProduct {
 }
 
 async function queryPublicProducts<T>(query: (client: PrismaClientInstance) => Promise<T>, fallback: T) {
+  if (shouldSkipPublicDbRead()) {
+    return fallback;
+  }
+
   try {
     const { prisma } = await import("@/lib/db");
-    return await query(prisma);
+    const result = await query(prisma);
+    markPublicDbAvailable();
+    return result;
   } catch (error) {
-    console.error("Falling back to static product data because the database is unavailable.", error);
+    markPublicDbUnavailable(error);
     return fallback;
   }
 }

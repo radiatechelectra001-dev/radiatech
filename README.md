@@ -6,19 +6,25 @@ Create or update `.env` with the values used by the database, admin login, uploa
 
 ```env
 DATABASE_URL="postgresql://..."
-JWT_SECRET="change-this-secret"
-ADMIN_EMAIL="admin@example.com"
+JWT_SECRET="use-a-long-random-secret"
+ADMIN_EMAIL="admin@radiatech.in"
+ADMIN_PASSWORD="use-a-strong-password"
+SEED_SECRET="use-a-long-random-seed-secret"
 
 RESEND_API_KEY="re_..."
 EMAIL_FROM="Radiatech Electra <noreply@radiatech.in>"
-ADMIN_NOTIFICATION_EMAIL="sales@example.com"
+ADMIN_NOTIFICATION_EMAIL="sales@radiatech.in"
+
+NEXT_PUBLIC_SITE_URL="https://radiatech.in"
+NEXT_PUBLIC_SITE_NAME="Radiatech Electra"
+NEXT_PUBLIC_WHATSAPP_NUMBER="918178850959"
+NEXT_PUBLIC_PHONE_NUMBER="+91 81788 50959"
 
 R2_ACCOUNT_ID="..."
 R2_ACCESS_KEY_ID="..."
 R2_SECRET_ACCESS_KEY="..."
 R2_BUCKET_NAME="radiatech-images"
 R2_PUBLIC_URL="https://pub-6f6e10a32fff4209bd4d2f49885eafe7.r2.dev"
-NEXT_PUBLIC_SITE_URL="https://radiatech.in"
 ```
 
 `ADMIN_NOTIFICATION_EMAIL` can contain one email address or a comma-separated list. Customer confirmation emails are sent to the email entered in the inquiry form when one is provided.

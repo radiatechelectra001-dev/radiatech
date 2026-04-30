@@ -28,6 +28,8 @@ function plainTextFromHtml(value: string) {
 
 export default function AdminBlogForm({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [blogId, setBlogId] = useState<string | null>(null);
@@ -45,28 +47,49 @@ export default function AdminBlogForm({ params }: { params: Promise<{ id: string
   useEffect(() => {
     let cancelled = false;
     params.then(async ({ id }) => {
-      const auth = await fetch("/api/auth/me");
-      if (auth.status === 401) {
-        router.replace("/admin/login");
-        return;
-      }
+      try {
+        const auth = await fetch("/api/auth/me");
+        if (auth.status === 401) {
+          router.replace("/admin/login");
+          return;
+        }
 
-      if (id !== "new") {
-        setIsEdit(true);
-        setBlogId(id);
-        const response = await fetch(`/api/blogs/${id}`);
-        if (response.ok && !cancelled) {
-          const blog = await response.json();
-          setForm({
-            title: blog.title,
-            slug: blog.slug,
-            excerpt: blog.excerpt,
-            content: blog.content,
-            coverImage: blog.coverImage || "",
-            author: blog.author || "R Singh",
-            tagsText: tagsTextFromValue(blog.tags),
-            isPublished: blog.isPublished,
-          });
+        if (id !== "new") {
+          setIsEdit(true);
+          setBlogId(id);
+          const response = await fetch(`/api/blogs/${id}`);
+          const blog = (await response.json().catch(() => null)) as Record<string, unknown> & { error?: unknown } | null;
+          if (!response.ok) {
+            if (!cancelled) {
+              setLoadError(typeof blog?.error === "string" ? blog.error : "Unable to load blog post.");
+            }
+            return;
+          }
+
+          if (!cancelled && blog) {
+            setForm({
+              title: String(blog.title || ""),
+              slug: String(blog.slug || ""),
+              excerpt: String(blog.excerpt || ""),
+              content: String(blog.content || ""),
+              coverImage: String(blog.coverImage || ""),
+              author: String(blog.author || "R Singh"),
+              tagsText: tagsTextFromValue(blog.tags),
+              isPublished: Boolean(blog.isPublished),
+            });
+          }
+        }
+
+        if (!cancelled) {
+          setLoadError("");
+        }
+      } catch {
+        if (!cancelled) {
+          setLoadError("Unable to load blog post.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
         }
       }
     });
@@ -118,6 +141,11 @@ export default function AdminBlogForm({ params }: { params: Promise<{ id: string
       description="Create articles with formatted headings, lists, images, and publishing status."
       action={<button onClick={() => router.push("/admin/blogs")} className="border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Back to Blogs</button>}
     >
+      {loading ? (
+        <div className="h-64 animate-pulse border border-slate-200 bg-white" />
+      ) : loadError ? (
+        <div className="border border-red-200 bg-red-50 px-5 py-6 text-sm font-medium text-red-700">{loadError}</div>
+      ) : (
       <form onSubmit={handleSubmit} className="max-w-5xl space-y-6">
         <section className="border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-950">Post Details</h2>
@@ -150,6 +178,7 @@ export default function AdminBlogForm({ params }: { params: Promise<{ id: string
           <button type="button" onClick={() => router.push("/admin/blogs")} className="border border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
         </div>
       </form>
+      )}
     </AdminShell>
   );
 }

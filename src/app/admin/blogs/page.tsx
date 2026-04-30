@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Edit3, Plus, Trash2 } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
 import Pagination from "@/components/admin/Pagination";
@@ -31,41 +31,68 @@ export default function AdminBlogsPage() {
   const router = useRouter();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [page, setPage] = useState(1);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize, total: 0, totalPages: 1 });
 
-  const fetchBlogs = useCallback(async () => {
-    try {
-      const authResponse = await fetch("/api/auth/me");
-      if (authResponse.status === 401) {
-        router.replace("/admin/login");
-        return;
-      }
-
-      const response = await fetch(`/api/blogs?admin=true&page=${page}&pageSize=${pageSize}`);
-      if (!response.ok) return;
-
-      const data = await response.json();
-      setBlogs(data.items || []);
-      setPagination(data.pagination || { page, pageSize, total: 0, totalPages: 1 });
-      if (data.pagination?.totalPages && page > data.pagination.totalPages) setPage(data.pagination.totalPages);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, router]);
-
   useEffect(() => {
-    void fetchBlogs();
-  }, [fetchBlogs]);
+    let cancelled = false;
+
+    async function loadBlogs() {
+      try {
+        const authResponse = await fetch("/api/auth/me");
+        if (authResponse.status === 401) {
+          router.replace("/admin/login");
+          return;
+        }
+
+        const response = await fetch(`/api/blogs?admin=true&page=${page}&pageSize=${pageSize}`);
+        const data = (await response.json().catch(() => null)) as { items?: Blog[]; pagination?: PaginationState; error?: unknown } | null;
+        if (cancelled) return;
+
+        if (!response.ok) {
+          setBlogs([]);
+          setError(typeof data?.error === "string" ? data.error : "Unable to load blog posts.");
+          return;
+        }
+
+        setBlogs(data?.items || []);
+        setPagination(data?.pagination || { page, pageSize, total: 0, totalPages: 1 });
+        setError("");
+        if (data?.pagination?.totalPages && page > data.pagination.totalPages) setPage(data.pagination.totalPages);
+      } catch {
+        if (!cancelled) {
+          setBlogs([]);
+          setError("Unable to load blog posts.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadBlogs();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page, refreshKey, router]);
 
   const handleDelete = async (blogId: string) => {
     if (!confirm("Delete this blog post?")) return;
     setLoading(true);
     const response = await fetch(`/api/blogs/${blogId}`, { method: "DELETE" });
-    if (!response.ok) return;
+    if (!response.ok) {
+      const data = (await response.json().catch(() => null)) as { error?: unknown } | null;
+      setError(typeof data?.error === "string" ? data.error : "Unable to delete blog post.");
+      setLoading(false);
+      return;
+    }
 
     if (blogs.length === 1 && page > 1) setPage((currentPage) => currentPage - 1);
-    else void fetchBlogs();
+    else setRefreshKey((current) => current + 1);
   };
 
   const handlePageChange = (nextPage: number) => {
@@ -85,6 +112,8 @@ export default function AdminBlogsPage() {
     >
       {loading ? (
         <div className="h-64 animate-pulse border border-slate-200 bg-white" />
+      ) : error ? (
+        <div className="border border-red-200 bg-red-50 px-5 py-6 text-sm font-medium text-red-700">{error}</div>
       ) : blogs.length === 0 ? (
         <div className="border border-dashed border-slate-300 bg-white px-5 py-16 text-center text-sm text-slate-500">No blog posts yet.</div>
       ) : (

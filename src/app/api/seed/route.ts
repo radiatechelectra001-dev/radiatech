@@ -1,23 +1,32 @@
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { jsonError, logServerError } from "@/lib/api";
 
 export async function POST(request: Request) {
-  // Check for seed secret to prevent unauthorized seeding
   const { searchParams } = new URL(request.url);
   const secret = searchParams.get("secret");
-  if (secret !== "radiatech-seed-2026") {
+
+  if (!process.env.SEED_SECRET) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (secret !== process.env.SEED_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
+    return jsonError("Seed configuration is incomplete.", 500);
   }
 
   try {
     // Create admin user
-    const hashedPassword = await hashPassword(process.env.ADMIN_PASSWORD || "Radiatech@2026");
+    const hashedPassword = await hashPassword(process.env.ADMIN_PASSWORD);
     await prisma.adminUser.upsert({
-      where: { email: process.env.ADMIN_EMAIL || "admin@radiatech.in" },
+      where: { email: process.env.ADMIN_EMAIL },
       update: {},
       create: {
-        email: process.env.ADMIN_EMAIL || "admin@radiatech.in",
+        email: process.env.ADMIN_EMAIL,
         password: hashedPassword,
         name: "Admin",
       },
@@ -146,7 +155,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Seed error:", error);
-    return NextResponse.json({ error: "Seed failed", details: String(error) }, { status: 500 });
+    logServerError("api.seed.POST", error);
+    return jsonError("Seed failed.", 500);
   }
 }

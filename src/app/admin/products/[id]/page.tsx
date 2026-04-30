@@ -87,6 +87,8 @@ export default function AdminProductForm({ params }: { params: Promise<{ id: str
   const isEdit = id !== "new";
   const productId = isEdit ? id : null;
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -107,33 +109,64 @@ export default function AdminProductForm({ params }: { params: Promise<{ id: str
     let cancelled = false;
 
     async function fetchData() {
-      const authRes = await fetch("/api/auth/me");
-      if (authRes.status === 401) {
-        router.replace("/admin/login");
-        return;
-      }
+      try {
+        const authRes = await fetch("/api/auth/me");
+        if (authRes.status === 401) {
+          router.replace("/admin/login");
+          return;
+        }
 
-      const categoryResponse = await fetch("/api/categories");
-      if (categoryResponse.ok && !cancelled) setCategories(await categoryResponse.json());
+        const categoryResponse = await fetch("/api/categories");
+        const categoryData = (await categoryResponse.json().catch(() => null)) as Category[] | { error?: unknown } | null;
+        if (!categoryResponse.ok) {
+          if (!cancelled) {
+            setLoadError(typeof categoryData && categoryData && "error" in categoryData && typeof categoryData.error === "string" ? categoryData.error : "Unable to load categories.");
+          }
+          return;
+        }
 
-      if (isEdit && productId) {
-        const response = await fetch(`/api/products/${productId}`);
-        if (response.ok && !cancelled) {
-          const product = await response.json();
-          setForm({
-            name: product.name,
-            slug: product.slug,
-            description: product.description,
-            pricePerMeter: product.pricePerMeter || "",
-            specificationText: specificationTextFromValue(product.specifications),
-            applicationsText: applicationsTextFromValue(product.applications),
-            image: product.image || "",
-            categoryId: product.categoryId || "",
-            isFeatured: product.isFeatured,
-            isNewArrival: product.isNewArrival,
-            isActive: product.isActive,
-            images: parseImages(product.images, product.image || ""),
-          });
+        if (!cancelled) {
+          setCategories(Array.isArray(categoryData) ? categoryData : []);
+        }
+
+        if (isEdit && productId) {
+          const response = await fetch(`/api/products/${productId}`);
+          const product = (await response.json().catch(() => null)) as Record<string, unknown> & { error?: unknown } | null;
+          if (!response.ok) {
+            if (!cancelled) {
+              setLoadError(typeof product?.error === "string" ? product.error : "Unable to load product.");
+            }
+            return;
+          }
+
+          if (!cancelled && product) {
+            setForm({
+              name: String(product.name || ""),
+              slug: String(product.slug || ""),
+              description: String(product.description || ""),
+              pricePerMeter: String(product.pricePerMeter || ""),
+              specificationText: specificationTextFromValue(product.specifications),
+              applicationsText: applicationsTextFromValue(product.applications),
+              image: String(product.image || ""),
+              categoryId: String(product.categoryId || ""),
+              isFeatured: Boolean(product.isFeatured),
+              isNewArrival: Boolean(product.isNewArrival),
+              isActive: Boolean(product.isActive),
+              images: parseImages(product.images, String(product.image || "")),
+            });
+          }
+        }
+
+        if (!cancelled) {
+          setLoadError("");
+        }
+      } catch {
+        if (!cancelled) {
+          setLoadError("Unable to load product form.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
         }
       }
     }
@@ -185,6 +218,11 @@ export default function AdminProductForm({ params }: { params: Promise<{ id: str
       description="Add product details, images, pricing, and catalogue visibility."
       action={<button onClick={() => router.push("/admin/products")} className="border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Back to Products</button>}
     >
+      {loading ? (
+        <div className="h-64 animate-pulse border border-slate-200 bg-white" />
+      ) : loadError ? (
+        <div className="border border-red-200 bg-red-50 px-5 py-6 text-sm font-medium text-red-700">{loadError}</div>
+      ) : (
       <form onSubmit={handleSubmit} className="max-w-5xl space-y-6">
         <section className="border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-950">Product Details</h2>
@@ -231,6 +269,7 @@ export default function AdminProductForm({ params }: { params: Promise<{ id: str
           <button type="button" onClick={() => router.push("/admin/products")} className="border border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
         </div>
       </form>
+      )}
     </AdminShell>
   );
 }

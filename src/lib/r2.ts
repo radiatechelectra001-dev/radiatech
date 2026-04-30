@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { logServerError } from "@/lib/api";
 
 const R2 = new S3Client({
   region: "auto",
@@ -16,7 +17,7 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
 export function isR2Configured(): boolean {
-  return !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY);
+  return !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_PUBLIC_URL);
 }
 
 /**
@@ -77,6 +78,6 @@ export async function deleteFromR2(url: string): Promise<void> {
       })
     );
   } catch (err) {
-    console.error("[R2] Failed to delete:", key, err);
+    logServerError("r2.delete", err);
   }
 }

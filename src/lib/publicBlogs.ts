@@ -1,4 +1,5 @@
 import { blogPosts } from "@/data/blogs";
+import { markPublicDbAvailable, markPublicDbUnavailable, shouldSkipPublicDbRead } from "@/lib/dbHealth";
 
 type PrismaClientInstance = typeof import("@/lib/db")["prisma"];
 
@@ -58,11 +59,17 @@ const fallbackBlogs: PublicBlogPost[] = blogPosts
   .sort((first, second) => second.createdAt.getTime() - first.createdAt.getTime());
 
 async function queryBlogs<T>(query: (client: PrismaClientInstance) => Promise<T>, fallback: T) {
+  if (shouldSkipPublicDbRead()) {
+    return fallback;
+  }
+
   try {
     const { prisma } = await import("@/lib/db");
-    return await query(prisma);
+    const result = await query(prisma);
+    markPublicDbAvailable();
+    return result;
   } catch (error) {
-    console.error("Falling back to static blog data because the database is unavailable.", error);
+    markPublicDbUnavailable(error);
     return fallback;
   }
 }

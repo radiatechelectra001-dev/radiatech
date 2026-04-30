@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2, Mail, Phone, Trash2, X } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
 import Pagination from "@/components/admin/Pagination";
@@ -34,48 +34,82 @@ export default function AdminInquiriesPage() {
   const router = useRouter();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [selected, setSelected] = useState<Inquiry | null>(null);
   const [page, setPage] = useState(1);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize, total: 0, totalPages: 1 });
 
-  const fetchInquiries = useCallback(async () => {
-    try {
-      const authResponse = await fetch("/api/auth/me");
-      if (authResponse.status === 401) {
-        router.replace("/admin/login");
-        return;
-      }
-
-      const response = await fetch(`/api/inquiries?page=${page}&pageSize=${pageSize}`);
-      if (!response.ok) return;
-
-      const data = await response.json();
-      setInquiries(data.items || []);
-      setPagination(data.pagination || { page, pageSize, total: 0, totalPages: 1 });
-      if (data.pagination?.totalPages && page > data.pagination.totalPages) setPage(data.pagination.totalPages);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, router]);
-
   useEffect(() => {
-    void fetchInquiries();
-  }, [fetchInquiries]);
+    let cancelled = false;
+
+    async function loadInquiries() {
+      try {
+        const authResponse = await fetch("/api/auth/me");
+        if (authResponse.status === 401) {
+          router.replace("/admin/login");
+          return;
+        }
+
+        const response = await fetch(`/api/inquiries?page=${page}&pageSize=${pageSize}`);
+        const data = (await response.json().catch(() => null)) as { items?: Inquiry[]; pagination?: PaginationState; error?: unknown } | null;
+        if (cancelled) return;
+
+        if (!response.ok) {
+          setInquiries([]);
+          setError(typeof data?.error === "string" ? data.error : "Unable to load inquiries.");
+          return;
+        }
+
+        setInquiries(data?.items || []);
+        setPagination(data?.pagination || { page, pageSize, total: 0, totalPages: 1 });
+        setError("");
+        if (data?.pagination?.totalPages && page > data.pagination.totalPages) setPage(data.pagination.totalPages);
+      } catch {
+        if (!cancelled) {
+          setInquiries([]);
+          setError("Unable to load inquiries.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadInquiries();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page, refreshKey, router]);
 
   const markRead = async (inquiryId: string) => {
     const response = await fetch(`/api/inquiries/${inquiryId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isRead: true }) });
-    if (response.ok) setInquiries((current) => current.map((inquiry) => inquiry.id === inquiryId ? { ...inquiry, isRead: true } : inquiry));
+    if (response.ok) {
+      setInquiries((current) => current.map((inquiry) => inquiry.id === inquiryId ? { ...inquiry, isRead: true } : inquiry));
+      setError("");
+      return;
+    }
+
+    const data = (await response.json().catch(() => null)) as { error?: unknown } | null;
+    setError(typeof data?.error === "string" ? data.error : "Unable to update inquiry.");
   };
 
   const handleDelete = async (inquiryId: string) => {
     if (!confirm("Delete this inquiry?")) return;
     setLoading(true);
     const response = await fetch(`/api/inquiries/${inquiryId}`, { method: "DELETE" });
-    if (!response.ok) return;
+    if (!response.ok) {
+      const data = (await response.json().catch(() => null)) as { error?: unknown } | null;
+      setError(typeof data?.error === "string" ? data.error : "Unable to delete inquiry.");
+      setLoading(false);
+      return;
+    }
 
     if (selected?.id === inquiryId) setSelected(null);
     if (inquiries.length === 1 && page > 1) setPage((currentPage) => currentPage - 1);
-    else void fetchInquiries();
+    else setRefreshKey((current) => current + 1);
   };
 
   const handlePageChange = (nextPage: number) => {
@@ -131,6 +165,8 @@ export default function AdminInquiriesPage() {
 
       {loading ? (
         <div className="h-64 animate-pulse border border-slate-200 bg-white" />
+      ) : error ? (
+        <div className="border border-red-200 bg-red-50 px-5 py-6 text-sm font-medium text-red-700">{error}</div>
       ) : inquiries.length === 0 ? (
         <div className="border border-dashed border-slate-300 bg-white px-5 py-16 text-center text-sm text-slate-500">No inquiries yet.</div>
       ) : (
