@@ -35,6 +35,27 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns,
   },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          // Prevent clickjacking — page cannot be embedded in an iframe on another site
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          // Prevent MIME-type sniffing
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          // Force HTTPS for 1 year, include subdomains
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          // Control what info is sent in the Referer header
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // Restrict browser features (camera, mic, geolocation, etc.)
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+          // Basic XSS protection for older browsers
+          { key: "X-XSS-Protection", value: "1; mode=block" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
