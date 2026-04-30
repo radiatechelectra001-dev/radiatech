@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Phone, Mail, MapPin } from "lucide-react";
+import { ExternalLink, Mail, MapPin, Phone } from "lucide-react";
 import { companyInfo } from "@/data/company";
 
 export default function Footer() {
@@ -12,20 +12,23 @@ export default function Footer() {
           {/* Company Info */}
           <div className="col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 mb-4 sm:mb-5">
-              <Image src="/LOGO.png" alt="Radiatech Electra" width={50} height={50} className="h-10 sm:h-12 w-auto" />
+              <Image src="/LOGO.png" alt="Radiatech Electra" width={50} height={50} className="h-10 w-10 object-contain sm:h-12 sm:w-12" />
+              <span className="text-base font-bold sm:text-lg">Radiatech Electra</span>
             </div>
             <p className="text-blue-100 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-5 line-clamp-3 sm:line-clamp-none">
               {companyInfo.about.short}
             </p>
             <div className="flex items-center gap-3">
-              {["facebook", "twitter", "instagram", "youtube"].map((s) => (
+              {["facebook", "instagram", "indiamart"].map((s) => (
                 <a
                   key={s}
-                  href="#"
+                  href={companyInfo.social[s as keyof typeof companyInfo.social]}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-8 h-8 sm:w-9 sm:h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-accent transition-colors"
                   aria-label={s}
                 >
-                  <span className="text-xs capitalize">{s[0].toUpperCase()}</span>
+                  <span className="text-xs font-bold uppercase">{s === "indiamart" ? "IM" : s[0]}</span>
                 </a>
               ))}
             </div>
@@ -84,7 +87,7 @@ export default function Footer() {
                 <span className="text-blue-100 text-xs sm:text-sm">{companyInfo.addresses[0].address}</span>
               </li>
               <li>
-                <a href={`tel:${companyInfo.contact.phone}`} className="flex items-center gap-3 text-blue-100 hover:text-accent transition-colors text-xs sm:text-sm">
+                <a href={`tel:${companyInfo.contact.phoneHref}`} className="flex items-center gap-3 text-blue-100 hover:text-accent transition-colors text-xs sm:text-sm">
                   <Phone size={16} className="text-accent shrink-0" />
                   {companyInfo.contact.phone}
                 </a>
@@ -102,6 +105,14 @@ export default function Footer() {
             >
               Send Inquiry
             </Link>
+            <a
+              href={companyInfo.social.indiamart}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-3 inline-flex items-center gap-2 mt-4 sm:mt-5 border border-white/20 px-5 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+            >
+              IndiaMART <ExternalLink size={14} />
+            </a>
           </div>
         </div>
       </div>

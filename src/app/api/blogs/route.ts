@@ -2,12 +2,44 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 
+function normalizeTags(value: unknown) {
+  if (Array.isArray(value)) return value.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0).map((tag) => tag.trim());
+  if (typeof value !== "string") return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0).map((tag) => tag.trim()) : [];
+  } catch {
+    return value.split(",").map((tag) => tag.trim()).filter(Boolean);
+  }
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const published = searchParams.get("published");
+  const admin = searchParams.get("admin") === "true";
+  const pageParam = searchParams.get("page");
+  const pageSizeParam = searchParams.get("pageSize");
+  const shouldPaginate = pageParam !== null || pageSizeParam !== null;
+  const page = Math.max(1, Number.parseInt(pageParam || "1", 10) || 1);
+  const pageSize = Math.min(50, Math.max(1, Number.parseInt(pageSizeParam || "10", 10) || 10));
+
+  if (admin) {
+    const session = await getSession();
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const where: Record<string, unknown> = {};
   if (published === "true") where.isPublished = true;
+
+  if (shouldPaginate) {
+    const [items, total] = await prisma.$transaction([
+      prisma.blogPost.findMany({ where, orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),
+      prisma.blogPost.count({ where }),
+    ]);
+
+    return NextResponse.json({ items, pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) } });
+  }
 
   const blogs = await prisma.blogPost.findMany({
     where,
@@ -30,7 +62,7 @@ export async function POST(req: NextRequest) {
         content: data.content || "",
         coverImage: data.coverImage || "",
         author: data.author || "R Singh",
-        tags: JSON.stringify(data.tags || []),
+        tags: JSON.stringify(normalizeTags(data.tags)),
         isPublished: data.isPublished || false,
         publishedAt: data.isPublished ? new Date() : null,
       },

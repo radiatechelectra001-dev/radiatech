@@ -1,150 +1,213 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Edit3, Plus, Trash2 } from "lucide-react";
+import AdminShell from "@/components/admin/AdminShell";
+import Pagination from "@/components/admin/Pagination";
 
 interface Product {
   id: string;
   slug: string;
   name: string;
   image: string;
+  pricePerMeter: string;
   isFeatured: boolean;
   isNewArrival: boolean;
   isActive: boolean;
-  category?: { name: string };
-  createdAt: string;
+  category?: { name: string } | null;
 }
 
-const navItems = [
-  { label: "Dashboard", href: "/admin", icon: "📊" },
-  { label: "Products", href: "/admin/products", icon: "📦" },
-  { label: "Categories", href: "/admin/categories", icon: "🗂️" },
-  { label: "Blog Posts", href: "/admin/blogs", icon: "✍️" },
-  { label: "Inquiries", href: "/admin/inquiries", icon: "📩" },
-];
+interface PaginationState {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+type ProductsResponse = {
+  items: Product[];
+  pagination: PaginationState;
+};
+
+const pageSize = 10;
+
+async function fetchProductsPage(page: number): Promise<ProductsResponse> {
+  const response = await fetch(`/api/products?admin=true&page=${page}&pageSize=${pageSize}`);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Unable to load products.");
+  }
+
+  return data;
+}
+
+function StatusPill({ active, label }: { active: boolean; label: string }) {
+  return (
+    <span className={`inline-flex px-2.5 py-1 text-xs font-semibold ${active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+      {active ? label : "-"}
+    </span>
+  );
+}
 
 export default function AdminProductsPage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const checkAuth = useCallback(async () => {
-    const res = await fetch("/api/auth/me");
-    if (res.status === 401) { router.replace("/admin/login"); return false; }
-    return true;
-  }, [router]);
-
-  const fetchProducts = useCallback(async () => {
-    try {
-      const res = await fetch("/api/products");
-      if (res.ok) { const data = await res.json(); setProducts(data); }
-    } catch {} finally { setLoading(false); }
-  }, []);
+  const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize, total: 0, totalPages: 1 });
 
   useEffect(() => {
-    (async () => { const ok = await checkAuth(); if (ok) await fetchProducts(); })();
-  }, [checkAuth, fetchProducts]);
+    let cancelled = false;
 
-  const handleDelete = async (id: string) => {
+    async function loadProducts() {
+      try {
+        const authResponse = await fetch("/api/auth/me");
+        if (authResponse.status === 401) {
+          router.replace("/admin/login");
+          return;
+        }
+
+        const data = await fetchProductsPage(page);
+        if (cancelled) return;
+
+        setProducts(data.items || []);
+        setPagination(data.pagination || { page, pageSize, total: 0, totalPages: 1 });
+        setError("");
+        if (data.pagination?.totalPages && page > data.pagination.totalPages) setPage(data.pagination.totalPages);
+      } catch (loadError) {
+        if (!cancelled) setError(loadError instanceof Error ? loadError.message : "Unable to load products.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void loadProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page, router]);
+
+  const handleDelete = async (productId: string) => {
     if (!confirm("Delete this product?")) return;
-    const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
-    if (res.ok) setProducts(products.filter(p => p.id !== id));
+    setLoading(true);
+    const response = await fetch(`/api/products/${productId}`, { method: "DELETE" });
+
+    if (!response.ok) {
+      setLoading(false);
+      return;
+    }
+
+    if (products.length === 1 && page > 1) {
+      setPage((currentPage) => currentPage - 1);
+      return;
+    }
+
+    setProducts((current) => current.filter((product) => product.id !== productId));
+    setPagination((current) => {
+      const total = Math.max(0, current.total - 1);
+      return { ...current, total, totalPages: Math.max(1, Math.ceil(total / current.pageSize)) };
+    });
+    setLoading(false);
   };
 
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.replace("/admin/login");
+  const handlePageChange = (nextPage: number) => {
+    setLoading(true);
+    setPage(nextPage);
   };
-
-  const sidebar = (
-    <div className="flex h-full flex-col bg-[#0B3D91] text-white">
-      <div className="flex items-center gap-2 border-b border-white/10 px-5 py-5">
-        <span className="text-xl font-bold">Radiatech</span>
-        <span className="rounded bg-[#F37021] px-2 py-0.5 text-xs font-semibold uppercase">Admin</span>
-      </div>
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {navItems.map((item) => (
-          <a key={item.href} href={item.href}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${item.href === "/admin/products" ? "bg-white/15 text-white" : "text-white/70 hover:bg-white/10 hover:text-white"}`}>
-            <span className="text-lg">{item.icon}</span>{item.label}
-          </a>
-        ))}
-      </nav>
-      <div className="border-t border-white/10 p-3">
-        <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 hover:bg-red-500/20 hover:text-red-200">
-          <span className="text-lg">🚪</span>Logout
-        </button>
-      </div>
-    </div>
-  );
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <aside className="hidden w-64 shrink-0 md:block">{sidebar}</aside>
-      {sidebarOpen && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 md:hidden ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>{sidebar}</aside>
-
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 md:hidden">
-          <button onClick={() => setSidebarOpen(true)} className="rounded-lg p-1.5 text-gray-600 hover:bg-gray-100">
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-          </button>
-          <span className="text-lg font-bold text-[#0B3D91]">Radiatech</span>
-          <span className="rounded bg-[#F37021] px-2 py-0.5 text-xs font-semibold uppercase text-white">Admin</span>
-        </header>
-
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-            <Link href="/admin/products/new" className="bg-[#0B3D91] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#0B3D91]/90 transition-colors">+ Add Product</Link>
+    <AdminShell
+      title="Products"
+      description="Manage catalogue items, gallery images, featured products, and availability status."
+      action={
+        <Link href="/admin/products/new" className="inline-flex w-full items-center justify-center gap-2 bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark sm:w-auto">
+          <Plus size={16} /> Add Product
+        </Link>
+      }
+    >
+      {loading ? (
+        <div className="h-64 animate-pulse border border-slate-200 bg-white" />
+      ) : error ? (
+        <div className="border border-red-200 bg-red-50 px-5 py-6 text-sm font-medium text-red-700">{error}</div>
+      ) : products.length === 0 ? (
+        <div className="border border-dashed border-slate-300 bg-white px-5 py-16 text-center text-sm text-slate-500">No products yet.</div>
+      ) : (
+        <>
+          <div className="grid gap-4 md:hidden">
+            {products.map((product) => (
+              <article key={product.id} className="border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="flex gap-3">
+                  {product.image ? <Image src={product.image} alt={product.name} width={64} height={64} unoptimized className="h-16 w-16 shrink-0 object-cover" /> : <div className="h-16 w-16 shrink-0 bg-slate-100" />}
+                  <div className="min-w-0 flex-1">
+                    <h2 className="truncate font-semibold text-slate-950">{product.name}</h2>
+                    <p className="mt-1 text-sm text-slate-500">{product.category?.name || "Uncategorized"}</p>
+                    {product.pricePerMeter && <p className="mt-1 text-sm font-semibold text-accent">{product.pricePerMeter}</p>}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <StatusPill active={product.isActive} label="Active" />
+                      <StatusPill active={product.isFeatured} label="Featured" />
+                      <StatusPill active={product.isNewArrival} label="New" />
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 flex gap-2 border-t border-slate-100 pt-3">
+                  <Link href={`/admin/products/${product.id}`} className="inline-flex flex-1 items-center justify-center gap-2 border border-slate-200 px-3 py-2 text-sm font-semibold text-primary hover:bg-slate-50">
+                    <Edit3 size={15} /> Edit
+                  </Link>
+                  <button onClick={() => handleDelete(product.id)} className="inline-flex flex-1 items-center justify-center gap-2 border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">
+                    <Trash2 size={15} /> Delete
+                  </button>
+                </div>
+              </article>
+            ))}
           </div>
 
-          {loading ? (
-            <div className="flex items-center justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0B3D91] border-t-transparent" /></div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-20 text-gray-400"><span className="text-4xl mb-2 block">📦</span><p>No products yet</p></div>
-          ) : (
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500">
-                    <th className="px-5 py-3 font-medium">Product</th>
-                    <th className="px-5 py-3 font-medium">Category</th>
-                    <th className="px-5 py-3 font-medium">Featured</th>
-                    <th className="px-5 py-3 font-medium">New</th>
-                    <th className="px-5 py-3 font-medium">Active</th>
-                    <th className="px-5 py-3 font-medium">Actions</th>
+          <div className="hidden overflow-x-auto border border-slate-200 bg-white shadow-sm md:block">
+            <table className="w-full min-w-[940px] text-left text-sm">
+              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">Product</th>
+                  <th className="px-5 py-3 font-semibold">Category</th>
+                  <th className="px-5 py-3 font-semibold">Price</th>
+                  <th className="px-5 py-3 font-semibold">Featured</th>
+                  <th className="px-5 py-3 font-semibold">New</th>
+                  <th className="px-5 py-3 font-semibold">Status</th>
+                  <th className="px-5 py-3 font-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {products.map((product) => (
+                  <tr key={product.id} className="hover:bg-slate-50">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        {product.image ? <Image src={product.image} alt={product.name} width={44} height={44} unoptimized className="h-11 w-11 object-cover" /> : <div className="h-11 w-11 bg-slate-100" />}
+                        <span className="font-medium text-slate-950">{product.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-slate-600">{product.category?.name || "-"}</td>
+                    <td className="px-5 py-4 font-semibold text-accent">{product.pricePerMeter || "-"}</td>
+                    <td className="px-5 py-4"><StatusPill active={product.isFeatured} label="Featured" /></td>
+                    <td className="px-5 py-4"><StatusPill active={product.isNewArrival} label="New" /></td>
+                    <td className="px-5 py-4"><StatusPill active={product.isActive} label="Active" /></td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-2">
+                        <Link href={`/admin/products/${product.id}`} className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-dark"><Edit3 size={15} /> Edit</Link>
+                        <button onClick={() => handleDelete(product.id)} className="inline-flex items-center gap-1 text-sm font-semibold text-red-600 hover:text-red-700"><Trash2 size={15} /> Delete</button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {products.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-3">
-                        <div className="flex items-center gap-3">
-                          {product.image && <img src={product.image} alt="" className="w-10 h-10 rounded-lg object-cover" />}
-                          <span className="font-medium text-gray-900">{product.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-5 py-3 text-gray-600">{product.category?.name || "—"}</td>
-                      <td className="px-5 py-3">{product.isFeatured ? <span className="text-green-600">✓</span> : "—"}</td>
-                      <td className="px-5 py-3">{product.isNewArrival ? <span className="text-blue-600">✓</span> : "—"}</td>
-                      <td className="px-5 py-3">{product.isActive ? <span className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full">Active</span> : <span className="bg-red-50 text-red-700 text-xs px-2 py-0.5 rounded-full">Inactive</span>}</td>
-                      <td className="px-5 py-3">
-                        <div className="flex items-center gap-2">
-                          <Link href={`/admin/products/${product.id}`} className="text-[#0B3D91] hover:underline text-xs font-medium">Edit</Link>
-                          <button onClick={() => handleDelete(product.id)} className="text-red-500 hover:underline text-xs font-medium">Delete</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </main>
-      </div>
-    </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Pagination page={pagination.page} totalPages={pagination.totalPages} total={pagination.total} pageSize={pagination.pageSize} onPageChange={handlePageChange} />
+        </>
+      )}
+    </AdminShell>
   );
 }

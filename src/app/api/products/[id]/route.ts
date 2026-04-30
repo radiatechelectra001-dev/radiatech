@@ -18,13 +18,23 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
   const data = await req.json();
-
-  if (data.specifications && typeof data.specifications !== "string") data.specifications = JSON.stringify(data.specifications);
-  if (data.applications && typeof data.applications !== "string") data.applications = JSON.stringify(data.applications);
-  if (data.images && typeof data.images !== "string") data.images = JSON.stringify(data.images);
+  const updateData = {
+    slug: data.slug,
+    name: data.name,
+    description: data.description,
+    pricePerMeter: data.pricePerMeter || "",
+    specifications: typeof data.specifications === "string" ? data.specifications : JSON.stringify(data.specifications || {}),
+    applications: typeof data.applications === "string" ? data.applications : JSON.stringify(data.applications || []),
+    image: data.image || "",
+    images: typeof data.images === "string" ? data.images : JSON.stringify(data.images || (data.image ? [data.image] : [])),
+    isNewArrival: Boolean(data.isNewArrival),
+    isFeatured: Boolean(data.isFeatured),
+    isActive: data.isActive !== false,
+    categoryId: data.categoryId,
+  };
 
   try {
-    const product = await prisma.product.update({ where: { id }, data });
+    const product = await prisma.product.update({ where: { id }, data: updateData });
     return NextResponse.json(product);
   } catch {
     return NextResponse.json({ error: "Failed to update" }, { status: 400 });

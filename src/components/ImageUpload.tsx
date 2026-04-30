@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import Image from "next/image";
+import { useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
 
 interface ImageUploadProps {
@@ -18,8 +19,9 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const [preview, setPreview] = useState(currentImage);
+  const [previewOverride, setPreviewOverride] = useState<string | null | undefined>(undefined);
   const inputRef = useRef<HTMLInputElement>(null);
+  const preview = previewOverride === undefined ? currentImage : previewOverride || undefined;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -32,7 +34,7 @@ export default function ImageUpload({
       // Show preview immediately
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreview(reader.result as string);
+        setPreviewOverride(reader.result as string);
       };
       reader.readAsDataURL(file);
 
@@ -53,10 +55,10 @@ export default function ImageUpload({
 
       const { url } = await res.json();
       onImageSelect(url);
-      setPreview(url);
+      setPreviewOverride(url);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
-      setPreview(undefined);
+      setPreviewOverride(undefined);
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -64,7 +66,7 @@ export default function ImageUpload({
   };
 
   const handleRemove = () => {
-    setPreview(undefined);
+    setPreviewOverride(null);
     onImageSelect("");
     if (inputRef.current) inputRef.current.value = "";
   };
@@ -76,10 +78,13 @@ export default function ImageUpload({
       {preview ? (
         <div className="relative">
           <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-            <img
+            <Image
               src={preview}
               alt="Preview"
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 420px"
+              unoptimized={preview.startsWith("data:")}
+              className="object-cover"
             />
             <button
               type="button"

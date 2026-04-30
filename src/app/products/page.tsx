@@ -2,15 +2,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import EnquiryButton from "@/components/EnquiryButton";
-import { categories, getNewArrivals } from "@/data/products";
+import { getPublicCategories, getPublicNewArrivals } from "@/lib/publicProducts";
 
 export const metadata = {
   title: "Products - Radiatech Electra",
   description: "Browse our complete range of PPR-C pipes, fittings, and industrial piping solutions.",
 };
 
-export default function ProductsPage() {
-  const newArrivals = getNewArrivals();
+export const dynamic = "force-dynamic";
+
+export default async function ProductsPage() {
+  const [categories, newArrivals] = await Promise.all([
+    getPublicCategories(),
+    getPublicNewArrivals(12),
+  ]);
 
   return (
     <main>
@@ -37,7 +42,7 @@ export default function ProductsPage() {
             {categories.map((cat) => (
               <div key={cat.slug} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 flex flex-col">
                 <Link href={`/products/${cat.slug}`} className="relative h-36 sm:h-52 overflow-hidden block">
-                  <Image src={cat.image} alt={cat.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <Image src={cat.image} alt={cat.name} fill sizes="(min-width: 1024px) 33vw, 50vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/70 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <h3 className="text-white text-lg font-bold">{cat.name}</h3>
@@ -67,7 +72,7 @@ export default function ProductsPage() {
             {newArrivals.map((product) => (
               <div key={product.id} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 flex flex-col">
                 <Link href={`/products/${product.categorySlug}/${product.id}`} className="relative h-36 sm:h-48 overflow-hidden block">
-                  <Image src={product.image} alt={product.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <Image src={product.image} alt={product.name} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute top-3 left-3"><span className="bg-accent text-white text-xs font-bold px-3 py-1">NEW</span></div>
                 </Link>
                 <div className="p-3 sm:p-4 flex flex-col flex-1">

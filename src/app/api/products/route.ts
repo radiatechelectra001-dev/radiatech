@@ -7,11 +7,37 @@ export async function GET(req: NextRequest) {
   const category = searchParams.get("category");
   const featured = searchParams.get("featured");
   const newArrivals = searchParams.get("newArrivals");
+  const admin = searchParams.get("admin") === "true";
+  const pageParam = searchParams.get("page");
+  const pageSizeParam = searchParams.get("pageSize");
+  const shouldPaginate = pageParam !== null || pageSizeParam !== null;
+  const page = Math.max(1, Number.parseInt(pageParam || "1", 10) || 1);
+  const pageSize = Math.min(50, Math.max(1, Number.parseInt(pageSizeParam || "10", 10) || 10));
 
-  const where: Record<string, unknown> = { isActive: true };
+  if (admin) {
+    const session = await getSession();
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const where: Record<string, unknown> = admin ? {} : { isActive: true };
   if (category) where.category = { slug: category };
   if (featured === "true") where.isFeatured = true;
   if (newArrivals === "true") where.isNewArrival = true;
+
+  if (shouldPaginate) {
+    const [items, total] = await prisma.$transaction([
+      prisma.product.findMany({
+        where,
+        include: { category: { select: { name: true, slug: true } } },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.product.count({ where }),
+    ]);
+
+    return NextResponse.json({ items, pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) } });
+  }
 
   const products = await prisma.product.findMany({
     where,
@@ -32,6 +58,7 @@ export async function POST(req: NextRequest) {
         slug: data.slug,
         name: data.name,
         description: data.description || "",
+        pricePerMeter: data.pricePerMeter || "",
         specifications: JSON.stringify(data.specifications || {}),
         applications: JSON.stringify(data.applications || []),
         image: data.image || "",

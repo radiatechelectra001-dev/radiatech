@@ -2,10 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { Shield, Clock, Tag, Users, Truck, Calendar, CheckCircle, Star, ArrowRight, ChevronRight, Phone, Factory, Wrench, Award } from "lucide-react";
 import { companyInfo } from "@/data/company";
-import { categories, products, getNewArrivals } from "@/data/products";
+import { getPublicCategories, getPublicFeaturedProducts, getPublicNewArrivals } from "@/lib/publicProducts";
 import { reviews, overallRating } from "@/data/reviews";
 import InquiryForm from "@/components/InquiryForm";
 import EnquiryButton from "@/components/EnquiryButton";
+
+export const dynamic = "force-dynamic";
 
 const iconMap: Record<string, React.ReactNode> = {
   shield: <Shield size={28} />,
@@ -16,16 +18,19 @@ const iconMap: Record<string, React.ReactNode> = {
   calendar: <Calendar size={28} />,
 };
 
-export default function HomePage() {
-  const newArrivals = getNewArrivals();
-  const featuredProducts = products.slice(0, 8);
+export default async function HomePage() {
+  const [categories, newArrivals, featuredProducts] = await Promise.all([
+    getPublicCategories(),
+    getPublicNewArrivals(8),
+    getPublicFeaturedProducts(8),
+  ]);
 
   return (
     <main>
       {/* ==================== HERO SECTION ==================== */}
       <section className="relative overflow-hidden bg-gray-50">
         <div className="absolute inset-0">
-          <Image src="/images/herobg.png" alt="" fill priority className="object-cover" />
+          <Image src="/images/herobg.png" alt="" fill priority sizes="100vw" className="object-cover" />
           <div className="absolute inset-0 bg-primary-dark/15" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-24">
@@ -37,7 +42,7 @@ export default function HomePage() {
                 <span>Trusted by {companyInfo.clients} Businesses</span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-6">
-                Leading Manufacturer of{" "}
+                Leading Supplier of{" "}
                 <span className="text-accent">Industrial PPR-C</span>{" "}
                 Piping Solutions
               </h1>
@@ -64,10 +69,10 @@ export default function HomePage() {
 
               {/* Quick Contact Buttons (below form) */}
               <div className="flex flex-wrap gap-2 sm:gap-3 mt-6">
-                <a href="tel:+919457893678" className="order-1 inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white px-5 sm:px-6 py-3 rounded-xl text-sm font-semibold transition-all flex-1 sm:flex-none">
+                <a href={`tel:${companyInfo.contact.phoneHref}`} className="order-1 inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white px-5 sm:px-6 py-3 rounded-xl text-sm font-semibold transition-all flex-1 sm:flex-none">
                   <Phone size={16} /> Call Now
                 </a>
-                <a href="https://wa.me/919457893678" target="_blank" rel="noopener noreferrer" className="order-2 inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1eb858] text-white px-5 sm:px-6 py-3 rounded-xl text-sm font-semibold transition-all flex-1 sm:flex-none">
+                <a href={`https://wa.me/${companyInfo.contact.whatsapp}`} target="_blank" rel="noopener noreferrer" className="order-2 inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1eb858] text-white px-5 sm:px-6 py-3 rounded-xl text-sm font-semibold transition-all flex-1 sm:flex-none">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                   WhatsApp
                 </a>
@@ -103,7 +108,7 @@ export default function HomePage() {
                 Your Trusted Partner for <span className="text-primary">Industrial Piping Solutions</span>
               </h2>
               <div className="relative mb-6 h-[280px] overflow-hidden shadow-lg lg:hidden">
-                <Image src="/images/aboutus.png" alt="About Radiatech Electra" fill className="object-cover" />
+                <Image src="/images/aboutus.png" alt="About Radiatech Electra" fill sizes="100vw" className="object-cover" />
               </div>
               <p className="text-gray-600 leading-relaxed mb-6">{companyInfo.about.short}</p>
               <div className="space-y-3 mb-8">
@@ -131,7 +136,7 @@ export default function HomePage() {
             {/* RIGHT: Image (matched height) */}
             <div className="relative hidden h-full min-h-[400px] lg:block">
               <div className="relative w-full h-full overflow-hidden shadow-lg">
-                <Image src="/images/aboutus.png" alt="About Radiatech Electra" fill className="object-cover" />
+                <Image src="/images/aboutus.png" alt="About Radiatech Electra" fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
               </div>
               <div className="absolute -bottom-8 -right-8 bg-primary p-6 text-white shadow-xl hidden md:block">
                 <div className="text-3xl font-bold">Since</div>
@@ -148,13 +153,13 @@ export default function HomePage() {
           <div className="text-center mb-14">
             <div className="flex items-center justify-center gap-3 mb-4"><div className="section-divider" /></div>
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Our Product Range</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">Comprehensive range of PPR-C pipes, fittings, and industrial piping solutions manufactured to the highest international standards.</p>
+            <p className="text-gray-600 max-w-2xl mx-auto">Comprehensive range of PPR-C pipes, fittings, and industrial piping solutions supplied to the highest international standards.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {categories.map((cat) => (
               <div key={cat.slug} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 flex flex-col">
                 <Link href={`/products/${cat.slug}`} className="relative h-52 overflow-hidden block">
-                  <Image src={cat.image} alt={cat.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <Image src={cat.image} alt={cat.name} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/70 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <h3 className="text-white text-lg font-bold">{cat.name}</h3>
@@ -193,7 +198,7 @@ export default function HomePage() {
             {newArrivals.map((product) => (
               <div key={product.id} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 flex flex-col">
                 <Link href={`/products/${product.categorySlug}/${product.id}`} className="relative h-36 sm:h-48 overflow-hidden block">
-                  <Image src={product.image} alt={product.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <Image src={product.image} alt={product.name} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute top-3 left-3"><span className="bg-accent text-white text-xs font-bold px-3 py-1">NEW</span></div>
                 </Link>
                 <div className="p-3 sm:p-4 flex flex-col flex-1">
@@ -223,7 +228,7 @@ export default function HomePage() {
             {featuredProducts.map((product) => (
               <div key={product.id} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 flex flex-col">
                 <Link href={`/products/${product.categorySlug}/${product.id}`} className="relative h-36 sm:h-48 overflow-hidden block">
-                  <Image src={product.image} alt={product.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <Image src={product.image} alt={product.name} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute top-3 left-3"><span className="bg-primary text-white text-xs font-bold px-3 py-1">FEATURED</span></div>
                 </Link>
                 <div className="p-3 sm:p-4 flex flex-col flex-1">
@@ -253,7 +258,7 @@ export default function HomePage() {
           <div className="text-center mb-14">
             <div className="flex items-center justify-center gap-3 mb-4"><div className="section-divider" /></div>
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Why Choose Us?</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">We combine quality manufacturing, industry expertise, and customer-centric service to deliver the best piping solutions.</p>
+            <p className="text-gray-600 max-w-2xl mx-auto">We combine reliable sourcing, industry expertise, and customer-centric service to deliver the best piping solutions.</p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
             {companyInfo.whyChooseUs.map((item) => (
@@ -297,7 +302,7 @@ export default function HomePage() {
             {[
               { step: "01", title: "Consultation", desc: "Understanding your piping requirements, site conditions, and specifications", icon: <Phone size={28} /> },
               { step: "02", title: "Design & Planning", desc: "Engineering the optimal piping solution with material selection and layout planning", icon: <Wrench size={28} /> },
-              { step: "03", title: "Manufacturing", desc: "Precision manufacturing of PPR-C pipes and fittings to DIN 16962 standards", icon: <Factory size={28} /> },
+              { step: "03", title: "Sourcing", desc: "Careful sourcing of PPR-C pipes and fittings aligned with DIN 16962 standards", icon: <Factory size={28} /> },
               { step: "04", title: "Installation & Delivery", desc: "Professional installation with quality assurance and timely delivery", icon: <Truck size={28} /> },
             ].map((item) => (
               <div key={item.step} className="relative text-center group">
@@ -317,7 +322,7 @@ export default function HomePage() {
           <div className="text-center mb-14">
             <div className="flex items-center justify-center gap-3 mb-4"><div className="section-divider" /></div>
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Our Projects</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">Showcasing our expertise in industrial piping installations across manufacturing and process industries.</p>
+            <p className="text-gray-600 max-w-2xl mx-auto">Showcasing our expertise in industrial piping installations across process industries.</p>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {[
@@ -421,7 +426,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14">
             <div className="flex items-center justify-center gap-3 mb-4"><div className="section-divider" /></div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Trusted by <span className="text-primary">Manufacturing & Process Industries</span></h2>
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Trusted by <span className="text-primary">Industrial & Process Industries</span></h2>
             <p className="text-gray-600 max-w-2xl mx-auto">Our clients include some of the most respected names in Indian industry.</p>
           </div>
           <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-8 overflow-x-auto sm:overflow-visible -mx-4 sm:mx-0 px-4 sm:px-0 pb-2 sm:pb-0">
@@ -450,7 +455,7 @@ export default function HomePage() {
             ].map((post) => (
               <Link key={post.slug} href={`/blogs/${post.slug}`} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 shrink-0 w-[80%] sm:w-auto snap-start">
                 <div className="relative h-48 overflow-hidden">
-                  <Image src={post.image} alt={post.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <Image src={post.image} alt={post.title} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 80vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
                 </div>
                 <div className="p-5">
                   <span className="text-xs text-gray-400">{new Date(post.date).toLocaleDateString("en-IN", { month: "long", day: "numeric", year: "numeric" })}</span>
@@ -472,7 +477,7 @@ export default function HomePage() {
       {/* ==================== CTA / INQUIRY SECTION ==================== */}
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/images/sendenquiry.png" alt="" fill className="object-cover" />
+          <Image src="/images/sendenquiry.png" alt="" fill sizes="100vw" className="object-cover" />
           <div className="absolute inset-0 bg-primary-dark/70" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6">

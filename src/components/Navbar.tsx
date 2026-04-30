@@ -42,7 +42,7 @@ export default function Navbar() {
               <MapPin size={14} />
               Noida, Uttar Pradesh, India
             </span>
-            <a href={`tel:${companyInfo.contact.phone}`} className="flex items-center gap-1 hover:text-accent transition-colors shrink-0">
+            <a href={`tel:${companyInfo.contact.phoneHref}`} className="flex items-center gap-1 hover:text-accent transition-colors shrink-0">
               <Phone size={14} />
               {companyInfo.contact.phone}
             </a>
@@ -52,8 +52,8 @@ export default function Navbar() {
             </a>
           </div>
           <div className="hidden sm:flex items-center gap-3 shrink-0">
-            {["facebook", "twitter", "instagram", "youtube"].map((s) => (
-              <a key={s} href={companyInfo.social[s as keyof typeof companyInfo.social]} className="hover:text-accent transition-colors" aria-label={s}>
+            {["facebook", "instagram", "indiamart"].map((s) => (
+              <a key={s} href={companyInfo.social[s as keyof typeof companyInfo.social]} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors" aria-label={s}>
                 <SocialIcon name={s} />
               </a>
             ))}
@@ -67,7 +67,10 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-18">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 shrink-0">
-              <Image src="/LOGO.png" alt="Radiatech Electra" width={48} height={48} className="h-12 w-auto" priority />
+              <Image src="/LOGO.png" alt="Radiatech Electra" width={48} height={48} className="h-12 w-12 object-contain" priority />
+              <span className="text-base font-bold leading-tight text-primary sm:text-lg">
+                Radiatech <span className="text-accent">Electra</span>
+              </span>
             </Link>
 
             {/* Desktop Nav */}
@@ -82,7 +85,7 @@ export default function Navbar() {
                   >
                     <Link
                       href={link.href}
-                      className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors rounded-md hover:bg-gray-50"
+                      className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors rounded-md hover:bg-gray-50 xl:px-4"
                     >
                       {link.label}
                       <ChevronDown size={14} className={`transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
@@ -105,7 +108,7 @@ export default function Navbar() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors rounded-md hover:bg-gray-50"
+                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary transition-colors rounded-md hover:bg-gray-50 xl:px-4"
                   >
                     {link.label}
                   </Link>
@@ -206,6 +209,8 @@ function SocialIcon({ name }: { name: string }) {
           <polygon points="9.75,15.02 15.5,11.75 9.75,8.48" fill="white" />
         </svg>
       );
+    case "indiamart":
+      return <span className="text-[11px] font-bold leading-none">IM</span>;
     default:
       return null;
   }

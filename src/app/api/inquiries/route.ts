@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { sendAdminNotification, sendCustomerConfirmation } from "@/lib/email";
+import { sendInquiryEmails } from "@/lib/email";
+import { checkRateLimit, getClientIdentifier } from "@/lib/rateLimit";
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -9,10 +10,30 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const isRead = searchParams.get("isRead");
+  const pageParam = searchParams.get("page");
+  const pageSizeParam = searchParams.get("pageSize");
+  const shouldPaginate = pageParam !== null || pageSizeParam !== null;
+  const page = Math.max(1, Number.parseInt(pageParam || "1", 10) || 1);
+  const pageSize = Math.min(50, Math.max(1, Number.parseInt(pageSizeParam || "10", 10) || 10));
 
   const where: Record<string, unknown> = {};
   if (isRead === "true") where.isRead = true;
   if (isRead === "false") where.isRead = false;
+
+  if (shouldPaginate) {
+    const [items, total] = await prisma.$transaction([
+      prisma.inquiry.findMany({
+        where,
+        include: { product: { select: { name: true, slug: true } } },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.inquiry.count({ where }),
+    ]);
+
+    return NextResponse.json({ items, pagination: { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) } });
+  }
 
   const inquiries = await prisma.inquiry.findMany({
     where,
@@ -25,6 +46,15 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
+    const clientIdentifier = getClientIdentifier(req);
+    const ipLimit = checkRateLimit({ key: `inquiry:ip:${clientIdentifier}`, limit: 8, windowMs: 15 * 60 * 1000 });
+
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many inquiry submissions. Please try again after a short break." },
+        { status: 429, headers: { "Retry-After": String(ipLimit.retryAfter) } },
+      );
+    }
 
     if (!data.name || !data.phone) {
       return NextResponse.json({ error: "Name and phone are required" }, { status: 400 });
@@ -34,6 +64,17 @@ export async function POST(req: NextRequest) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (data.email && !emailRegex.test(data.email)) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+    }
+
+    const contactKey = String(data.email || data.phone || "").toLowerCase().replace(/\s+/g, "");
+    if (contactKey) {
+      const contactLimit = checkRateLimit({ key: `inquiry:contact:${contactKey}`, limit: 5, windowMs: 60 * 60 * 1000 });
+      if (!contactLimit.allowed) {
+        return NextResponse.json(
+          { error: "Too many submissions from this contact. Please try again later." },
+          { status: 429, headers: { "Retry-After": String(contactLimit.retryAfter) } },
+        );
+      }
     }
 
     const inquiry = await prisma.inquiry.create({
@@ -50,7 +91,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Send DUAL emails (non-blocking)
     const emailData = {
       name: data.name,
       email: data.email || "",
@@ -62,16 +102,22 @@ export async function POST(req: NextRequest) {
       source: data.source || "website",
     };
 
-    // 1. Notify admin about new inquiry
-    sendAdminNotification(emailData).catch(console.error);
-
-    // 2. Send confirmation to customer only when email is provided
-    if (data.email) {
-      sendCustomerConfirmation(emailData).catch(console.error);
+    const delivery = await sendInquiryEmails(emailData);
+    if (!delivery.admin.ok || !delivery.customer.ok) {
+      console.error("[Inquiry email] Delivery failed", delivery);
+      return NextResponse.json(
+        {
+          success: true,
+          warning: "Inquiry saved. Email delivery needs attention in server email settings.",
+          email: delivery,
+          id: inquiry.id,
+        },
+        { status: 201 },
+      );
     }
 
-    return NextResponse.json({ success: true, id: inquiry.id }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: "Failed to submit inquiry" }, { status: 500 });
+    return NextResponse.json({ success: true, id: inquiry.id, email: delivery }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to submit inquiry" }, { status: 500 });
   }
 }

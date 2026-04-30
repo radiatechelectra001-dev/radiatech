@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
+import SiteFrame from "@/components/SiteFrame";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,27 +15,27 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Radiatech Electra - Leading PPR-C Pipes & Fittings Manufacturer in India",
+    default: "Radiatech Electra - Leading PPR-C Pipes & Fittings Supplier in India",
     template: "%s | Radiatech Electra",
   },
-  description: "Radiatech Electra Private Limited is a leading manufacturer and supplier of PPR-C pipes and fittings for industrial applications. DIN 16962 compliant products with 50+ year service life. Serving 500+ businesses across India.",
-  keywords: ["PPR pipes", "PPRC fittings", "industrial piping", "pipe manufacturer", "Radiatech Electra", "piping solutions India", "PPR-C pipes manufacturer", "DIN 16962 pipes", "industrial pipe fittings", "PPR valves", "pipe welding tools"],
+  description: "Radiatech Electra Private Limited is a leading trader and supplier of PPR-C pipes and fittings for industrial applications. DIN 16962 compliant products with 50+ year service life. Serving 500+ businesses across India.",
+  keywords: ["PPR pipes", "PPRC fittings", "industrial piping", "pipe supplier", "Radiatech Electra", "piping solutions India", "PPR-C pipes supplier", "DIN 16962 pipes", "industrial pipe fittings", "PPR valves", "pipe welding tools"],
   authors: [{ name: "Radiatech Electra Private Limited" }],
   creator: "Radiatech Electra",
   publisher: "Radiatech Electra Private Limited",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://radiatechelectra.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://radiatech.in"),
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "en_IN",
     siteName: "Radiatech Electra",
-    title: "Radiatech Electra - Leading PPR-C Pipes & Fittings Manufacturer",
-    description: "Leading manufacturer and supplier of PPR-C pipes and fittings for industrial applications. DIN 16962 compliant. Trusted by 500+ businesses.",
+    title: "Radiatech Electra - Leading PPR-C Pipes & Fittings Supplier",
+    description: "Leading trader and supplier of PPR-C pipes and fittings for industrial applications. DIN 16962 compliant. Trusted by 500+ businesses.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Radiatech Electra - PPR-C Pipes Manufacturer",
-    description: "Leading manufacturer of industrial PPR-C piping solutions in India.",
+    title: "Radiatech Electra - PPR-C Pipes Supplier",
+    description: "Leading supplier of industrial PPR-C piping solutions in India.",
   },
   robots: { index: true, follow: true },
 };
@@ -46,12 +44,12 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Radiatech Electra Private Limited",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://radiatechelectra.com",
-  description: "Leading manufacturer and supplier of PPR-C pipes and fittings for industrial applications in India.",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://radiatech.in",
+  description: "Leading trader and supplier of PPR-C pipes and fittings for industrial applications in India.",
   foundingDate: "2021",
   contactPoint: {
     "@type": "ContactPoint",
-    telephone: "+91-9457893678",
+    telephone: "+91-8178850959",
     contactType: "sales",
     areaServed: "IN",
     availableLanguage: ["English", "Hindi"],
@@ -62,7 +60,11 @@ const jsonLd = {
     addressRegion: "Uttar Pradesh",
     addressCountry: "IN",
   },
-  sameAs: [],
+  sameAs: [
+    "https://www.facebook.com/Radiatechelectra/",
+    "https://www.instagram.com/radia.tech?igsh=MTIwNzNkMG9tYmpvbg==",
+    "https://www.indiamart.com/radiatechelectra/",
+  ],
 };
 
 export default function RootLayout({
@@ -80,10 +82,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <Navbar />
-        <div className="flex-1">{children}</div>
-        <Footer />
-        <WhatsAppButton />
+        <SiteFrame>{children}</SiteFrame>
       </body>
     </html>
   );

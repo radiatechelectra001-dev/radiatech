@@ -5,7 +5,7 @@ import { reviews, overallRating } from "@/data/reviews";
 
 export const metadata = {
   title: "Our Clients - Radiatech Electra",
-  description: "Trusted by leading manufacturing and process industries across India.",
+  description: "Trusted by leading industrial and process companies across India.",
 };
 
 export default function ClientsPage() {
@@ -14,7 +14,7 @@ export default function ClientsPage() {
       <section className="bg-gradient-to-r from-primary-dark to-primary py-16">
         <div className="max-w-7xl mx-auto px-4 text-white">
           <h1 className="text-4xl lg:text-5xl font-bold mb-4">Our Clients</h1>
-          <p className="text-blue-200 text-lg max-w-2xl">Trusted by leading names in India&apos;s manufacturing and process industries.</p>
+          <p className="text-blue-200 text-lg max-w-2xl">Trusted by leading names in India&apos;s industrial and process sectors.</p>
         </div>
       </section>
 

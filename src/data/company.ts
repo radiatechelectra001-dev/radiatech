@@ -13,8 +13,9 @@ export const companyInfo = {
   
   contact: {
     email: "rariatechelectra@gmail.com",
-    phone: "+91 9457893678",
-    whatsapp: "919457893678",
+    phone: "+91 81788 50959",
+    phoneHref: "+918178850959",
+    whatsapp: "918178850959",
     website: "www.radiatech.in",
   },
   
@@ -30,19 +31,19 @@ export const companyInfo = {
   ],
   
   social: {
-    facebook: "#",
+    facebook: "https://www.facebook.com/Radiatechelectra/",
     twitter: "#",
     linkedin: "#",
     youtube: "#",
-    instagram: "#",
+    instagram: "https://www.instagram.com/radia.tech?igsh=MTIwNzNkMG9tYmpvbg==",
     indiamart: "https://www.indiamart.com/radiatechelectra/",
   },
   
   about: {
-    short: "Radiatech Electra Private Limited is a leading manufacturer and supplier of PPR-C pipes and fittings, established in 2021. We specialize in industrial piping solutions for manufacturing and process industries across India.",
+    short: "Radiatech Electra Private Limited is a leading trader and supplier of PPR-C pipes and fittings, established in 2021. We specialize in industrial piping solutions for process industries across India.",
     mission: "To deliver high-quality industrial piping solutions that enhance sustainability, safety, and performance in every application we serve.",
     vision: "To become India's most trusted nationwide supplier of PPR-C piping systems and industrial piping solutions.",
-    description: "The driving force behind Radiatech Pipe and Fittings' success is the unwavering pursuit of perfection. As one of the most reputable suppliers of PPR-C pipes and fittings, Radiatech is committed to enhancing sustainability within the pipe and fittings industry—an essential factor for ensuring both quality and safety.\n\nWith over five years of industry experience, Radiatech offers a comprehensive range of PPR-C pipes in sizes from 16 mm to 315 mm and pressure ratings from PN 6 to PN 20. All fittings fully comply with DIN 16962 standards, ensuring durability and reliability.\n\nRadiatech's PPR-C pipes and fittings are an excellent alternative to conventional piping systems and are ideal for applications including hot and cold water distribution, compressed air systems, chemical supply lines, and clean water networks.",
+    description: "The driving force behind Radiatech Pipe and Fittings' success is the unwavering pursuit of perfection. As one of the most reputable suppliers of PPR-C pipes and fittings, Radiatech is committed to enhancing sustainability within the pipe and fittings industry, an essential factor for ensuring both quality and safety.\n\nWith over five years of industry experience, Radiatech offers a comprehensive range of PPR-C pipes in sizes from 20MM to 615 mm and pressure ratings from PN 6 to PN 20. All fittings fully comply with DIN 16962 standards, ensuring durability and reliability.\n\nRadiatech's PPR-C pipes and fittings are an excellent alternative to conventional piping systems and are ideal for applications including hot and cold water distribution, compressed air systems, chemical supply lines, and clean water networks.",
   },
   
   specializations: [
@@ -58,6 +59,7 @@ export const companyInfo = {
     "DIN 16962 Compliant",
     "ISO Quality Standards",
     "IndiaMART TrustSEAL Verified",
+    "MSME Certificate",
     "GST Registered",
   ],
   

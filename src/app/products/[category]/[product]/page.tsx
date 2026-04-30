@@ -1,31 +1,34 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, CheckCircle } from "lucide-react";
-import { categories, products, getProductById } from "@/data/products";
+import { companyInfo } from "@/data/company";
+import { getPublicCategoryBySlug, getPublicProductBySlugOrId, getPublicProducts } from "@/lib/publicProducts";
 import InquiryForm from "@/components/InquiryForm";
+import ProductImageGallery from "@/components/ProductImageGallery";
 
-export function generateStaticParams() {
-  return products.map((p) => ({
-    category: p.categorySlug,
-    product: p.id,
+export const dynamic = "force-dynamic";
+
+export async function generateStaticParams() {
+  const products = await getPublicProducts();
+  return products.map((product) => ({
+    category: product.categorySlug,
+    product: product.id,
   }));
 }
 
-export function generateMetadata({ params }: { params: Promise<{ product: string }> }) {
-  return params.then(({ product: productId }) => {
-    const p = getProductById(productId);
-    return { title: p ? `${p.name} - Radiatech Electra` : "Product" };
-  });
+export async function generateMetadata({ params }: { params: Promise<{ category: string; product: string }> }) {
+  const { category, product: productId } = await params;
+  const product = await getPublicProductBySlugOrId(productId, category);
+  return { title: product ? `${product.name} - Radiatech Electra` : "Product" };
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ category: string; product: string }> }) {
   const { category, product: productId } = await params;
-  const product = getProductById(productId);
+  const product = await getPublicProductBySlugOrId(productId, category);
   if (!product) notFound();
 
-  const cat = categories.find((c) => c.slug === category);
-  const galleryImages = product.images?.length ? product.images : [product.image];
+  const cat = await getPublicCategoryBySlug(category);
+  const galleryImages = product.images?.length ? [product.image, ...product.images] : [product.image];
 
   return (
     <main>
@@ -49,20 +52,7 @@ export default async function ProductPage({ params }: { params: Promise<{ catego
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
                 {/* Product Image + Specs */}
                 <div className="space-y-6">
-                  <div className="overflow-hidden shadow-lg bg-gray-50">
-                    <Image src={product.image} alt={product.name} width={600} height={500} className="w-full h-[300px] sm:h-[400px] object-cover" />
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Gallery</h3>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                      {galleryImages.map((image, index) => (
-                        <div key={`${image}-${index}`} className="relative aspect-square overflow-hidden border border-gray-100 bg-gray-50">
-                          <Image src={image} alt={`${product.name} gallery ${index + 1}`} fill className="object-cover" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <ProductImageGallery images={galleryImages} productName={product.name} />
 
                   {/* Specifications */}
                   {product.specifications && (
@@ -85,6 +75,13 @@ export default async function ProductPage({ params }: { params: Promise<{ catego
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{product.name}</h2>
                   <p className="text-gray-600 leading-relaxed mb-6">{product.description}</p>
 
+                  {product.pricePerMeter && (
+                    <div className="mb-6 border border-accent/20 bg-accent/5 px-4 py-3">
+                      <span className="block text-xs font-semibold uppercase tracking-wide text-accent">Price</span>
+                      <span className="mt-1 block text-2xl font-bold text-gray-900">{product.pricePerMeter}</span>
+                    </div>
+                  )}
+
                   {/* Applications */}
                   {product.applications && (
                     <div className="mb-8">
@@ -102,14 +99,14 @@ export default async function ProductPage({ params }: { params: Promise<{ catego
                   {/* Contact Buttons */}
                   <div className="grid grid-cols-2 gap-3 mb-6">
                     <a
-                      href="tel:+919457893678"
+                      href={`tel:${companyInfo.contact.phoneHref}`}
                       className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white py-3 px-3 text-sm font-semibold transition-colors"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                       Call Now
                     </a>
                     <a
-                      href={`https://wa.me/919457893678?text=${encodeURIComponent(`Hi Radiatech Electra, I'm interested in ${product.name}. Please share more details and pricing.`)}`}
+                      href={`https://wa.me/${companyInfo.contact.whatsapp}?text=${encodeURIComponent(`Hi Radiatech Electra, I'm interested in ${product.name}. Please share more details and pricing.`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white py-3 px-3 text-sm font-semibold transition-colors"

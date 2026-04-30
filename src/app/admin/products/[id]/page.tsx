@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
+import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/ImageUpload";
 import MultiImageUpload from "@/components/MultiImageUpload";
 
@@ -24,13 +25,61 @@ const parseImages = (images: unknown, fallbackImage: string) => {
   return fallbackImage ? [fallbackImage] : [];
 };
 
-const parseJsonField = <T,>(value: string, fallback: T): T => {
+function parseJsonObject(value: unknown): Record<string, string> {
+  if (typeof value !== "string") return typeof value === "object" && value && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).map(([key, item]) => [key, String(item)])) : {};
+
   try {
-    return JSON.parse(value) as T;
+    const parsed = JSON.parse(value);
+    return typeof parsed === "object" && parsed && !Array.isArray(parsed) ? Object.fromEntries(Object.entries(parsed).map(([key, item]) => [key, String(item)])) : {};
   } catch {
-    return fallback;
+    return {};
   }
-};
+}
+
+function parseJsonArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+  if (typeof value !== "string") return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string" && item.trim().length > 0) : [];
+  } catch {
+    return value.split(/\n|,/).map((item) => item.trim()).filter(Boolean);
+  }
+}
+
+function specificationTextFromValue(value: unknown) {
+  return Object.entries(parseJsonObject(value)).map(([key, item]) => `${key}: ${item}`).join("\n");
+}
+
+function applicationsTextFromValue(value: unknown) {
+  return parseJsonArray(value).join("\n");
+}
+
+function parseSpecificationText(value: string) {
+  const details: Record<string, string> = {};
+  value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .forEach((line, index) => {
+      const separatorIndex = line.indexOf(":");
+      if (separatorIndex > -1) {
+        const key = line.slice(0, separatorIndex).trim();
+        const item = line.slice(separatorIndex + 1).trim();
+        if (key && item) details[key] = item;
+        return;
+      }
+
+      details[`Detail ${index + 1}`] = line;
+    });
+
+  return details;
+}
+
+function parseApplicationsText(value: string) {
+  return value.split(/\n|,/).map((item) => item.trim()).filter(Boolean);
+}
 
 export default function AdminProductForm({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -40,8 +89,17 @@ export default function AdminProductForm({ params }: { params: Promise<{ id: str
   const [categories, setCategories] = useState<Category[]>([]);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    name: "", slug: "", description: "", specifications: "{}", applications: "[]",
-    image: "", categoryId: "", isFeatured: false, isNewArrival: false, isActive: true,
+    name: "",
+    slug: "",
+    description: "",
+    pricePerMeter: "",
+    specificationText: "",
+    applicationsText: "",
+    image: "",
+    categoryId: "",
+    isFeatured: false,
+    isNewArrival: false,
+    isActive: true,
     images: [] as string[],
   });
 
@@ -50,146 +108,142 @@ export default function AdminProductForm({ params }: { params: Promise<{ id: str
 
     async function fetchData() {
       const authRes = await fetch("/api/auth/me");
-      if (authRes.status === 401) { router.replace("/admin/login"); return; }
+      if (authRes.status === 401) {
+        router.replace("/admin/login");
+        return;
+      }
 
-      const catRes = await fetch("/api/categories");
-      if (catRes.ok && !cancelled) { const data = await catRes.json(); setCategories(data); }
+      const categoryResponse = await fetch("/api/categories");
+      if (categoryResponse.ok && !cancelled) setCategories(await categoryResponse.json());
 
       if (isEdit && productId) {
-        const res = await fetch(`/api/products/${productId}`);
-        if (res.ok && !cancelled) {
-          const p = await res.json();
+        const response = await fetch(`/api/products/${productId}`);
+        if (response.ok && !cancelled) {
+          const product = await response.json();
           setForm({
-            name: p.name, slug: p.slug, description: p.description,
-            specifications: typeof p.specifications === "string" ? p.specifications : JSON.stringify(p.specifications, null, 2),
-            applications: typeof p.applications === "string" ? p.applications : JSON.stringify(p.applications, null, 2),
-            image: p.image || "", categoryId: p.categoryId || "",
-            isFeatured: p.isFeatured, isNewArrival: p.isNewArrival, isActive: p.isActive,
-            images: parseImages(p.images, p.image || ""),
+            name: product.name,
+            slug: product.slug,
+            description: product.description,
+            pricePerMeter: product.pricePerMeter || "",
+            specificationText: specificationTextFromValue(product.specifications),
+            applicationsText: applicationsTextFromValue(product.applications),
+            image: product.image || "",
+            categoryId: product.categoryId || "",
+            isFeatured: product.isFeatured,
+            isNewArrival: product.isNewArrival,
+            isActive: product.isActive,
+            images: parseImages(product.images, product.image || ""),
           });
         }
       }
     }
 
     void fetchData();
-
     return () => { cancelled = true; };
   }, [router, isEdit, productId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setSaving(true);
 
     const slug = form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const body = {
-      ...form,
       slug,
-      specifications: parseJsonField(form.specifications, {}),
-      applications: parseJsonField<string[]>(form.applications, []),
+      name: form.name.trim(),
+      description: form.description.trim(),
+      pricePerMeter: form.pricePerMeter.trim(),
+      specifications: parseSpecificationText(form.specificationText),
+      applications: parseApplicationsText(form.applicationsText),
+      image: form.image,
       images: form.images.length > 0 ? form.images : form.image ? [form.image] : [],
+      categoryId: form.categoryId,
+      isFeatured: form.isFeatured,
+      isNewArrival: form.isNewArrival,
+      isActive: form.isActive,
     };
 
     const url = isEdit ? `/api/products/${productId}` : "/api/products";
     const method = isEdit ? "PUT" : "POST";
 
     try {
-      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      if (res.ok) router.push("/admin/products");
-      else { const data = await res.json(); alert(data.error || "Failed to save"); }
-    } catch { alert("Error saving product"); }
-    finally { setSaving(false); }
+      const response = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (response.ok) router.push("/admin/products");
+      else {
+        const data = await response.json();
+        alert(data.error || "Failed to save product");
+      }
+    } catch {
+      alert("Error saving product");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">{isEdit ? "Edit Product" : "Add Product"}</h1>
-          <button onClick={() => router.push("/admin/products")} className="text-sm text-gray-600 hover:text-gray-900">← Back to Products</button>
+    <AdminShell
+      title={isEdit ? "Edit Product" : "Add Product"}
+      description="Add product details, images, pricing, and catalogue visibility."
+      action={<button onClick={() => router.push("/admin/products")} className="border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Back to Products</button>}
+    >
+      <form onSubmit={handleSubmit} className="max-w-5xl space-y-6">
+        <section className="border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-950">Product Details</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Product Name *"><input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="admin-input" /></Field>
+            <Field label="Category *">
+              <select required value={form.categoryId} onChange={(event) => setForm({ ...form, categoryId: event.target.value })} className="admin-input">
+                <option value="">Select category</option>
+                {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+              </select>
+            </Field>
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <Field label="Price Per Meter"><input value={form.pricePerMeter} onChange={(event) => setForm({ ...form, pricePerMeter: event.target.value })} placeholder="₹ 98/Meter" className="admin-input" /></Field>
+            <div className="flex flex-wrap items-end gap-5 pb-2">
+              <Toggle label="Featured" checked={form.isFeatured} onChange={(checked) => setForm({ ...form, isFeatured: checked })} />
+              <Toggle label="New Arrival" checked={form.isNewArrival} onChange={(checked) => setForm({ ...form, isNewArrival: checked })} />
+              <Toggle label="Active" checked={form.isActive} onChange={(checked) => setForm({ ...form, isActive: checked })} />
+            </div>
+          </div>
+          <Field label="Description *" className="mt-4"><textarea required rows={5} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="admin-input resize-none" /></Field>
+        </section>
+
+        <section className="border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-950">Product Images</h2>
+          <div className="grid gap-5 lg:grid-cols-2">
+            <ImageUpload folder="products" currentImage={form.image} onImageSelect={(url) => setForm({ ...form, image: url, images: form.images.length > 0 ? form.images : url ? [url] : [] })} label="Main Image" />
+            <MultiImageUpload folder="products" currentImages={form.images} onImagesSelect={(urls) => setForm({ ...form, images: urls, image: form.image || urls[0] || "" })} label="Gallery Images" />
+          </div>
+        </section>
+
+        <section className="border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-950">More Details</h2>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Field label="Key Details"><textarea rows={8} value={form.specificationText} onChange={(event) => setForm({ ...form, specificationText: event.target.value })} placeholder={"Material: PPR-C\nSize Range: 20MM to 615 mm\nPressure Rating: PN 6 to PN 20"} className="admin-input resize-none" /></Field>
+            <Field label="Applications"><textarea rows={8} value={form.applicationsText} onChange={(event) => setForm({ ...form, applicationsText: event.target.value })} placeholder={"Water Supply\nChemical Plants\nCooling Towers"} className="admin-input resize-none" /></Field>
+          </div>
+        </section>
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <button type="submit" disabled={saving} className="bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60">
+            {saving ? "Saving..." : isEdit ? "Update Product" : "Create Product"}
+          </button>
+          <button type="button" onClick={() => router.push("/admin/products")} className="border border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
         </div>
+      </form>
+    </AdminShell>
+  );
+}
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
-              <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-              <input type="text" value={form.slug} onChange={e => setForm({...form, slug: e.target.value})} placeholder="Auto-generated from name"
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none" />
-            </div>
-          </div>
+function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
+  return <label className={`block ${className}`}><span className="mb-1 block text-sm font-medium text-slate-700">{label}</span>{children}</label>;
+}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-            <select required value={form.categoryId} onChange={e => setForm({...form, categoryId: e.target.value})}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
-              <option value="">Select category</option>
-              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
-            <textarea required rows={3} value={form.description} onChange={e => setForm({...form, description: e.target.value})}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none" />
-          </div>
-
-          <div>
-            <ImageUpload
-              folder="products"
-              currentImage={form.image}
-              onImageSelect={(url) => setForm({ ...form, image: url, images: form.images.length > 0 ? form.images : url ? [url] : [] })}
-              label="Product Image"
-            />
-          </div>
-
-          <div>
-            <MultiImageUpload
-              folder="products"
-              currentImages={form.images}
-              onImagesSelect={(urls) => setForm({ ...form, images: urls, image: form.image || urls[0] || "" })}
-              label="Product Gallery Images"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Specifications (JSON)</label>
-            <textarea rows={4} value={form.specifications} onChange={e => setForm({...form, specifications: e.target.value})} placeholder='{"Material": "PPR-C", "Size": "20mm"}'
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none" />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Applications (JSON Array)</label>
-            <textarea rows={3} value={form.applications} onChange={e => setForm({...form, applications: e.target.value})} placeholder='["Water Supply", "Chemical Plants"]'
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none resize-none" />
-          </div>
-
-          <div className="flex flex-wrap gap-6">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={form.isFeatured} onChange={e => setForm({...form, isFeatured: e.target.checked})} className="w-4 h-4 rounded border-gray-300 text-blue-600" />
-              <span className="text-sm text-gray-700">Featured</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={form.isNewArrival} onChange={e => setForm({...form, isNewArrival: e.target.checked})} className="w-4 h-4 rounded border-gray-300 text-blue-600" />
-              <span className="text-sm text-gray-700">New Arrival</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={form.isActive} onChange={e => setForm({...form, isActive: e.target.checked})} className="w-4 h-4 rounded border-gray-300 text-blue-600" />
-              <span className="text-sm text-gray-700">Active</span>
-            </label>
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={saving} className="bg-[#0B3D91] text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#0B3D91]/90 transition-colors disabled:opacity-50">
-              {saving ? "Saving..." : isEdit ? "Update Product" : "Create Product"}
-            </button>
-            <button type="button" onClick={() => router.push("/admin/products")} className="border border-gray-200 text-gray-600 px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
-          </div>
-        </form>
-      </div>
-    </div>
+function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (checked: boolean) => void }) {
+  return (
+    <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} className="h-4 w-4 border-slate-300 text-primary" />
+      {label}
+    </label>
   );
 }

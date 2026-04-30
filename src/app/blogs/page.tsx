@@ -34,7 +34,7 @@ export default async function BlogsPage() {
                   <Link key={blog.id} href={`/blogs/${blog.slug}`} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100">
                     <div className="relative h-52 overflow-hidden bg-gray-100">
                       {blog.coverImage ? (
-                        <Image src={blog.coverImage} alt={blog.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                        <Image src={blog.coverImage} alt={blog.title} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10"><span className="text-5xl">📝</span></div>
                       )}

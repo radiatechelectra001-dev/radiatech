@@ -32,6 +32,7 @@ model Product {
   slug           String          @unique
   name           String
   description    String
+  pricePerMeter  String          @default("")
   specifications String          @default("{}") // JSON string
   applications   String          @default("[]") // JSON string
   image          String          @default("")

@@ -4,7 +4,7 @@ import { companyInfo } from "@/data/company";
 
 export const metadata = {
   title: "About Us - Radiatech Electra",
-  description: "Learn about Radiatech Electra Private Limited - a leading manufacturer of PPR-C pipes and fittings established in 2021.",
+  description: "Learn about Radiatech Electra Private Limited - a leading trader and supplier of PPR-C pipes and fittings established in 2021.",
 };
 
 export default function AboutPage() {
@@ -93,7 +93,7 @@ export default function AboutPage() {
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Certifications & Compliance</h2>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
             {companyInfo.certifications.map((cert) => (
               <div key={cert} className="bg-white rounded-xl p-6 text-center shadow-sm border border-gray-100">
                 <Award size={32} className="text-primary mx-auto mb-3" />
@@ -113,7 +113,7 @@ export default function AboutPage() {
           <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             {[
               { label: "Company Name", value: companyInfo.fullName },
-              { label: "Nature of Business", value: "Manufacturer, Trader, Supplier of Services" },
+              { label: "Nature of Business", value: "Trader, Supplier of Products and Services" },
               { label: "Company CEO", value: companyInfo.ceo },
               { label: "Year of Establishment", value: String(companyInfo.established) },
               { label: "Total Employees", value: companyInfo.employees },

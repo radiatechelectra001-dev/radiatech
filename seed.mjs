@@ -16,23 +16,32 @@ async function main() {
   console.log("🌱 Seeding database...");
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || "Radiatech@2026", 12);
-  await prisma.adminUser.upsert({
-    where: { email: process.env.ADMIN_EMAIL || "admin@radiatech.in" },
-    update: {},
-    create: {
-      email: process.env.ADMIN_EMAIL || "admin@radiatech.in",
-      password: hashedPassword,
-      name: "Admin",
-    },
-  });
-  console.log("✅ Admin user created");
+  const adminUsers = [
+    { email: process.env.ADMIN_EMAIL || "admin@radiatech.in", password: process.env.ADMIN_PASSWORD || "Radiatech@2026", name: "Admin" },
+    process.env.EXTRA_ADMIN_EMAIL && process.env.EXTRA_ADMIN_PASSWORD
+      ? { email: process.env.EXTRA_ADMIN_EMAIL, password: process.env.EXTRA_ADMIN_PASSWORD, name: "Radiatech Admin" }
+      : null,
+  ].filter(Boolean);
+
+  for (const adminUser of adminUsers) {
+    const hashedPassword = await bcrypt.hash(adminUser.password, 12);
+    await prisma.adminUser.upsert({
+      where: { email: adminUser.email },
+      update: { password: hashedPassword, name: adminUser.name },
+      create: {
+        email: adminUser.email,
+        password: hashedPassword,
+        name: adminUser.name,
+      },
+    });
+  }
+  console.log("✅ Admin users seeded");
 
   // Seed categories
   const categoryData = [
-    { slug: "ppr-pipes", name: "PPR Pipes", description: "Premium quality PPR-C pipes available in sizes from 16mm to 315mm with pressure ratings from PN 6 to PN 20.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg", sortOrder: 1 },
+    { slug: "ppr-pipes", name: "PPR Pipes", description: "Premium quality PPR-C pipes available in sizes from 20MM to 615 mm with pressure ratings from PN 6 to PN 20.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg", sortOrder: 1 },
     { slug: "ppr-pipe-fittings", name: "PPR Pipe Fittings", description: "Complete range of PPR pipe fittings including elbows, tees, couplers, clamps, and reducers.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM.jpeg", sortOrder: 2 },
-    { slug: "pprc-fittings", name: "PPRC Fittings", description: "Industrial-grade PPRC fittings for large diameter piping systems in manufacturing and process industries.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM (1).jpeg", sortOrder: 3 },
+    { slug: "pprc-fittings", name: "PPRC Fittings", description: "Industrial-grade PPRC fittings for large diameter piping systems in industrial and process applications.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM (1).jpeg", sortOrder: 3 },
     { slug: "pipes-fittings", name: "Pipes & Fittings", description: "General-purpose pipes and fittings for construction and plumbing applications.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM (2).jpeg", sortOrder: 4 },
     { slug: "compressed-air-pipe-fittings", name: "Compressed Air Pipe Fittings", description: "Specialized piping solutions for compressed air, nitrogen, oxygen, and vacuum line applications.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.24 PM.jpeg", sortOrder: 5 },
     { slug: "industrial-piping-services", name: "Industrial Piping Services", description: "End-to-end industrial piping installation, lining, and maintenance services.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.21 PM (1).jpeg", sortOrder: 6 },
@@ -51,7 +60,7 @@ async function main() {
 
   // Seed products
   const productData = [
-    { slug: "fusion-ppr-pipes", name: "Fusion PPR Pipes", catSlug: "ppr-pipes", description: "High-quality Fusion PPR pipes designed for industrial and commercial applications.", specs: { Material: "PPR-C (Polypropylene Random Copolymer Type 3)", "Size Range": "16mm to 315mm", "Pressure Rating": "PN 6 to PN 20", Standard: "DIN 16962", "Temperature Range": "Up to 95°C", "Service Life": "50+ years", Color: "Green / White" }, apps: ["Hot/Cold Water Supply", "Chemical Plants", "Cooling Towers", "Condensor Lines"], image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg", featured: true },
+    { slug: "fusion-ppr-pipes", name: "Fusion PPR Pipes", catSlug: "ppr-pipes", description: "High-quality Fusion PPR pipes designed for industrial and commercial applications.", specs: { Material: "PPR-C (Polypropylene Random Copolymer Type 3)", "Size Range": "20MM to 615 mm", "Pressure Rating": "PN 6 to PN 20", Standard: "DIN 16962", "Temperature Range": "Up to 95°C", "Service Life": "50+ years", Color: "Green / White" }, apps: ["Hot/Cold Water Supply", "Chemical Plants", "Cooling Towers", "Condensor Lines"], image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg", featured: true },
     { slug: "fusion-ppr-pipe-pn16", name: "Fusion PPR Pipe PN 16 Waterline Special", catSlug: "ppr-pipes", description: "Specialized PN 16 rated PPR pipes designed specifically for waterline applications.", specs: { Material: "PPR-C Type 3", "Pressure Rating": "PN 16", Standard: "DIN 16962", "Temperature Range": "Up to 95°C", "Inner Layer": "Anti-microbial", "Outer Layer": "UV Stabilized", "Service Life": "50+ years" }, apps: ["Drinking Water Supply", "Plumbing", "DM Water Lines", "Liquid Food Supply"], image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg", featured: true },
     { slug: "green-therm-ppr-pipes", name: "Green Therm PPR Pipes", catSlug: "ppr-pipes", description: "Premium Green Therm PPR pipes with enhanced thermal properties.", specs: { Material: "PPR-C Type 3 with UV Stabilizer", "Size Range": "20mm to 160mm", "Pressure Rating": "PN 10 to PN 20", Standard: "DIN 16962", "UV Protection": "Yes", "Anti-microbial": "Yes", "Service Life": "50+ years" }, apps: ["Solar Water Heater", "Hot Water Supply", "Industrial Cooling", "Process Lines"], image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.28 PM.jpeg", featured: true },
     { slug: "fusion-ppr-pipes-standard", name: "Fusion PPR Pipes - Standard Range", catSlug: "ppr-pipes", description: "Standard range Fusion PPR pipes for general-purpose industrial piping.", specs: { Material: "PPR-C", "Friction Factor": "1.5 Ft/100 Ft", "Chemical Resistance": "Excellent", "Sound Insulation": "Yes", "Frost Proof": "Yes", "Leak Proof": "Yes" }, apps: ["Chilled Water Supply", "Pharmaceutical Industries", "RO Plants", "Fire Applications"], image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg" },
@@ -97,10 +106,10 @@ async function main() {
       slug: "why-pprc-pipes-future-industrial-piping",
       title: "Why PPR-C Pipes Are the Future of Industrial Piping",
       excerpt: "Discover why PPR-C pipes are rapidly replacing traditional metal piping systems in industrial applications across India.",
-      content: `<h2>PPR-C Pipes: The Future of Industrial Piping</h2><p>PPR-C pipes have revolutionized the industrial piping landscape. With a service life exceeding 50 years and resistance to temperatures up to 95°C, these pipes offer unmatched durability and performance.</p><h3>Key Advantages of PPR-C Pipes</h3><ul><li><strong>Corrosion Resistance</strong> — Unlike metal pipes, PPR-C pipes are immune to corrosion.</li><li><strong>Chemical Resistance</strong> — PPR-C pipes can handle a wide range of chemicals.</li><li><strong>Thermal Insulation</strong> — Low thermal conductivity reduces heat loss.</li><li><strong>Hygiene</strong> — Anti-microbial inner layer prevents bacterial growth.</li><li><strong>Easy Installation</strong> — Fusion welding creates permanent, leak-proof joints.</li></ul><p>At Radiatech, we manufacture PPR-C pipes that comply with DIN 16962 standards, ensuring the highest quality for your industrial applications.</p>`,
+      content: `<h2>PPR-C Pipes: The Future of Industrial Piping</h2><p>PPR-C pipes have revolutionized the industrial piping landscape. With a service life exceeding 50 years and resistance to temperatures up to 95°C, these pipes offer unmatched durability and performance.</p><h3>Key Advantages of PPR-C Pipes</h3><ul><li><strong>Corrosion Resistance</strong> — Unlike metal pipes, PPR-C pipes are immune to corrosion.</li><li><strong>Chemical Resistance</strong> — PPR-C pipes can handle a wide range of chemicals.</li><li><strong>Thermal Insulation</strong> — Low thermal conductivity reduces heat loss.</li><li><strong>Hygiene</strong> — Anti-microbial inner layer prevents bacterial growth.</li><li><strong>Easy Installation</strong> — Fusion welding creates permanent, leak-proof joints.</li></ul><p>At Radiatech, we supply PPR-C pipes that comply with DIN 16962 standards, ensuring the highest quality for your industrial applications.</p>`,
       coverImage: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg",
       author: "R Singh",
-      tags: ["PPR-C", "Industrial Piping", "Manufacturing"],
+      tags: ["PPR-C", "Industrial Piping", "Supply"],
       isPublished: true,
     },
     {

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calendar, ArrowLeft, User, Tag } from "lucide-react";
+import { companyInfo } from "@/data/company";
 import { getPublishedBlogBySlug, getRelatedBlogs, parseBlogTags } from "@/lib/publicBlogs";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +50,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
               <Image src={blog.coverImage} alt={blog.title} width={900} height={450} className="w-full h-[240px] sm:h-[350px] object-cover" />
             </div>
           )}
-          <article className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-li:text-gray-600" dangerouslySetInnerHTML={{ __html: blog.content }} />
+          <article className="blog-content" dangerouslySetInnerHTML={{ __html: blog.content }} />
 
           {/* Tags */}
           {tags.length > 0 && (
@@ -65,8 +66,8 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
             <p className="text-blue-200 mb-4">Our experts are ready to help you find the perfect PPR-C piping solution.</p>
             <div className="flex flex-wrap gap-3">
               <Link href="/contact" className="bg-accent hover:bg-accent-dark text-white px-6 py-3 text-sm font-semibold transition-colors">Send Inquiry</Link>
-              <a href={`https://wa.me/919457893678?text=${encodeURIComponent("Hi, I read your blog and I'm interested in PPR-C piping solutions.")}`} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] hover:bg-[#1da851] text-white px-6 py-3 text-sm font-semibold transition-colors">WhatsApp Us</a>
-              <a href="tel:+919457893678" className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 text-sm font-semibold transition-colors border border-white/20">Call Now</a>
+              <a href={`https://wa.me/${companyInfo.contact.whatsapp}?text=${encodeURIComponent("Hi, I read your blog and I'm interested in PPR-C piping solutions.")}`} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] hover:bg-[#1da851] text-white px-6 py-3 text-sm font-semibold transition-colors">WhatsApp Us</a>
+              <a href={`tel:${companyInfo.contact.phoneHref}`} className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 text-sm font-semibold transition-colors border border-white/20">Call Now</a>
             </div>
           </div>
 
@@ -79,7 +80,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                   <Link key={rb.id} href={`/blogs/${rb.slug}`} className="group bg-white overflow-hidden border border-gray-100 hover:shadow-lg transition-all">
                     {rb.coverImage && (
                       <div className="relative h-36 overflow-hidden">
-                        <Image src={rb.coverImage} alt={rb.title} fill className="object-cover group-hover:scale-105 transition-transform" />
+                        <Image src={rb.coverImage} alt={rb.title} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover group-hover:scale-105 transition-transform" />
                       </div>
                     )}
                     <div className="p-4">

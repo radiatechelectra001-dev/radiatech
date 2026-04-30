@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { getPublicCategories } from "@/lib/publicProducts";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://radiatechelectra.com";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://radiatech.in";
 
   const staticPages = [
     { url: `${baseUrl}/`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 1 },
@@ -13,10 +14,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/infrastructure`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.6 },
   ];
 
-  const categoryPages = [
-    "ppr-pipes", "ppr-fittings", "pprc-valves", "flange-systems", "welding-tools", "pipe-support-systems",
-  ].map((slug) => ({
-    url: `${baseUrl}/products/${slug}`,
+  const categories = await getPublicCategories();
+  const categoryPages = categories.map((category) => ({
+    url: `${baseUrl}/products/${category.slug}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.8,

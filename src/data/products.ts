@@ -23,7 +23,7 @@ export const categories: ProductCategory[] = [
   {
     slug: "ppr-pipes",
     name: "PPR Pipes",
-    description: "Premium quality PPR-C pipes available in sizes from 16mm to 315mm with pressure ratings from PN 6 to PN 20. DIN 16962 compliant with UV stabilized outer layer and anti-microbial inner layer.",
+    description: "Premium quality PPR-C pipes available in sizes from 20MM to 615 mm with pressure ratings from PN 6 to PN 20. DIN 16962 compliant with UV stabilized outer layer and anti-microbial inner layer.",
     image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg",
     productCount: 4,
   },
@@ -58,7 +58,7 @@ export const categories: ProductCategory[] = [
   {
     slug: "industrial-piping-services",
     name: "Industrial Piping Services",
-    description: "End-to-end industrial piping installation, lining, and maintenance services for manufacturing and process industries.",
+    description: "End-to-end industrial piping installation, lining, and maintenance services for process industries.",
     image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.21 PM (1).jpeg",
     productCount: 3,
   },
@@ -74,7 +74,7 @@ export const products: Product[] = [
     description: "High-quality Fusion PPR pipes designed for industrial and commercial applications. Available in multiple sizes with excellent heat and chemical resistance. UV stabilized outer layer ensures long-term durability even in exposed installations.",
     specifications: {
       "Material": "PPR-C (Polypropylene Random Copolymer Type 3)",
-      "Size Range": "16mm to 315mm",
+      "Size Range": "20MM to 615 mm",
       "Pressure Rating": "PN 6 to PN 20",
       "Standard": "DIN 16962",
       "Temperature Range": "Up to 95°C",
@@ -144,7 +144,7 @@ export const products: Product[] = [
     name: "PPR Reducing Tee 63MM x 50MM",
     category: "PPR Pipe Fittings",
     categorySlug: "ppr-pipe-fittings",
-    description: "High-quality PPR reducing tee fitting for transitioning between different pipe sizes. Manufactured to DIN 16962 standards for reliable performance in industrial piping systems.",
+    description: "High-quality PPR reducing tee fitting for transitioning between different pipe sizes. Supplied to DIN 16962 standards for reliable performance in industrial piping systems.",
     specifications: {
       "Size": "63MM x 50MM",
       "Material": "PPR-C",
@@ -160,7 +160,7 @@ export const products: Product[] = [
     name: "Fusion PPRC Elbow 50MM",
     category: "PPR Pipe Fittings",
     categorySlug: "ppr-pipe-fittings",
-    description: "50MM PPRC elbow fitting for directional changes in piping systems. Precision manufactured for perfect alignment and leak-proof joints through fusion welding.",
+    description: "50MM PPRC elbow fitting for directional changes in piping systems. Engineered for perfect alignment and leak-proof joints through fusion welding.",
     specifications: {
       "Size": "50MM",
       "Material": "PPRC",
@@ -221,7 +221,7 @@ export const products: Product[] = [
     name: "PPRC Coupler",
     category: "PPRC Fittings",
     categorySlug: "pprc-fittings",
-    description: "Premium PPRC coupler for joining PPRC pipes. Manufactured with precision for leak-proof fusion welded connections in industrial applications.",
+    description: "Premium PPRC coupler for joining PPRC pipes. Supplied for leak-proof fusion welded connections in industrial applications.",
     specifications: {
       "Material": "PPRC",
       "Connection": "Fusion Welding",

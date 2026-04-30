@@ -30,11 +30,11 @@ export const blogPosts: BlogPost[] = [
 
 5. **Easy Installation** - Fusion welding creates permanent, leak-proof joints that are stronger than the pipe itself.
 
-At Radiatech, we manufacture PPR-C pipes that comply with DIN 16962 standards, ensuring the highest quality for your industrial applications.`,
+At Radiatech, we supply PPR-C pipes that comply with DIN 16962 standards, ensuring the highest quality for your industrial applications.`,
     author: "R Singh",
     date: "2026-03-15",
     image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg",
-    tags: ["PPR-C", "Industrial Piping", "Manufacturing"],
+    tags: ["PPR-C", "Industrial Piping", "Supply"],
   },
   {
     id: "2",

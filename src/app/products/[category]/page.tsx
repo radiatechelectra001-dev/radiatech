@@ -2,26 +2,29 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { categories, getProductsByCategory } from "@/data/products";
+import { companyInfo } from "@/data/company";
+import { getPublicCategories, getPublicCategoryBySlug, getPublicProductsByCategory } from "@/lib/publicProducts";
 import EnquiryButton from "@/components/EnquiryButton";
 
-export function generateStaticParams() {
+export const dynamic = "force-dynamic";
+
+export async function generateStaticParams() {
+  const categories = await getPublicCategories();
   return categories.map((cat) => ({ category: cat.slug }));
 }
 
-export function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
-  return params.then(({ category }) => {
-    const cat = categories.find((c) => c.slug === category);
-    return { title: cat ? `${cat.name} - Radiatech Electra` : "Products" };
-  });
+export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
+  const { category } = await params;
+  const cat = await getPublicCategoryBySlug(category);
+  return { title: cat ? `${cat.name} - Radiatech Electra` : "Products" };
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
-  const cat = categories.find((c) => c.slug === category);
+  const cat = await getPublicCategoryBySlug(category);
   if (!cat) notFound();
 
-  const products = getProductsByCategory(category);
+  const products = await getPublicProductsByCategory(category);
 
   return (
     <main>
@@ -43,7 +46,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
             {products.map((product) => (
               <div key={product.id} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 flex flex-col">
                 <Link href={`/products/${category}/${product.id}`} className="relative h-56 overflow-hidden block">
-                  <Image src={product.image} alt={product.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <Image src={product.image} alt={product.name} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
                   {product.isNewArrival && (
                     <div className="absolute top-3 left-3"><span className="bg-accent text-white text-xs font-bold px-3 py-1">NEW</span></div>
                   )}
@@ -80,8 +83,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
           </div>
           <div className="flex flex-wrap gap-3 shrink-0">
             <Link href="/contact" className="bg-accent hover:bg-accent-dark text-white px-6 py-3 text-sm font-semibold transition-colors">Send Enquiry</Link>
-            <a href="tel:+919457893678" className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 text-sm font-semibold transition-colors border border-white/20">Call Now</a>
-            <a href="https://wa.me/919457893678" target="_blank" rel="noopener noreferrer" className="bg-[#25D366] hover:bg-[#1da851] text-white px-6 py-3 text-sm font-semibold transition-colors">WhatsApp</a>
+            <a href={`tel:${companyInfo.contact.phoneHref}`} className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 text-sm font-semibold transition-colors border border-white/20">Call Now</a>
+            <a href={`https://wa.me/${companyInfo.contact.whatsapp}`} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] hover:bg-[#1da851] text-white px-6 py-3 text-sm font-semibold transition-colors">WhatsApp</a>
           </div>
         </div>
       </section>

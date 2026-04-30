@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { companyInfo } from "@/data/company";
 
 interface InquiryFormProps {
   productName?: string;
@@ -203,7 +204,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
       {!compact && !minimal && (
         <p className="text-xs text-gray-400 text-center">
           Or contact us directly on{" "}
-          <a href={`https://wa.me/919457893678`} className="text-green font-medium hover:underline">
+          <a href={`https://wa.me/${companyInfo.contact.whatsapp}`} className="text-green font-medium hover:underline">
             WhatsApp
           </a>
         </p>
