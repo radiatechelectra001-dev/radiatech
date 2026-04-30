@@ -10,7 +10,9 @@ export async function GET(req: NextRequest) {
 
     const categories = await prisma.productCategory.findMany({
       orderBy: { sortOrder: "asc" },
-      include: includeProducts ? { products: { where: { isActive: true }, orderBy: { createdAt: "desc" } } } : undefined,
+      include: includeProducts
+        ? { products: { where: { isActive: true }, orderBy: { createdAt: "desc" } }, _count: { select: { products: true } } }
+        : { _count: { select: { products: true } } },
     });
     return NextResponse.json(categories);
   } catch (error) {

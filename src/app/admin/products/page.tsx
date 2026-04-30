@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Edit3, Plus, Trash2 } from "lucide-react";
+import { Edit3, Filter, Plus, Trash2 } from "lucide-react";
 import AdminShell from "@/components/admin/AdminShell";
 import Pagination from "@/components/admin/Pagination";
 
@@ -17,7 +17,13 @@ interface Product {
   isFeatured: boolean;
   isNewArrival: boolean;
   isActive: boolean;
-  category?: { name: string } | null;
+  category?: { name: string; slug: string } | null;
+}
+
+interface Category {
+  id: string;
+  slug: string;
+  name: string;
 }
 
 interface PaginationState {
@@ -34,14 +40,12 @@ type ProductsResponse = {
 
 const pageSize = 10;
 
-async function fetchProductsPage(page: number): Promise<ProductsResponse> {
-  const response = await fetch(`/api/products?admin=true&page=${page}&pageSize=${pageSize}`);
+async function fetchProductsPage(page: number, categorySlug: string): Promise<ProductsResponse> {
+  const params = new URLSearchParams({ admin: "true", page: String(page), pageSize: String(pageSize) });
+  if (categorySlug) params.set("category", categorySlug);
+  const response = await fetch(`/api/products?${params.toString()}`);
   const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Unable to load products.");
-  }
-
+  if (!response.ok) throw new Error(data.error || "Unable to load products.");
   return data;
 }
 
@@ -56,10 +60,20 @@ function StatusPill({ active, label }: { active: boolean; label: string }) {
 export default function AdminProductsPage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [pagination, setPagination] = useState<PaginationState>({ page: 1, pageSize, total: 0, totalPages: 1 });
+
+  // Load categories once for filter dropdown
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setCategories(data as Category[]); })
+      .catch(() => null);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,7 +86,7 @@ export default function AdminProductsPage() {
           return;
         }
 
-        const data = await fetchProductsPage(page);
+        const data = await fetchProductsPage(page, categoryFilter);
         if (cancelled) return;
 
         setProducts(data.items || []);
@@ -87,27 +101,15 @@ export default function AdminProductsPage() {
     }
 
     void loadProducts();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [page, router]);
+    return () => { cancelled = true; };
+  }, [page, categoryFilter, router]);
 
   const handleDelete = async (productId: string) => {
     if (!confirm("Delete this product?")) return;
     setLoading(true);
     const response = await fetch(`/api/products/${productId}`, { method: "DELETE" });
-
-    if (!response.ok) {
-      setLoading(false);
-      return;
-    }
-
-    if (products.length === 1 && page > 1) {
-      setPage((currentPage) => currentPage - 1);
-      return;
-    }
-
+    if (!response.ok) { setLoading(false); return; }
+    if (products.length === 1 && page > 1) { setPage((p) => p - 1); return; }
     setProducts((current) => current.filter((product) => product.id !== productId));
     setPagination((current) => {
       const total = Math.max(0, current.total - 1);
@@ -116,9 +118,12 @@ export default function AdminProductsPage() {
     setLoading(false);
   };
 
-  const handlePageChange = (nextPage: number) => {
+  const handlePageChange = (nextPage: number) => { setLoading(true); setPage(nextPage); };
+
+  const handleCategoryFilter = (slug: string) => {
     setLoading(true);
-    setPage(nextPage);
+    setPage(1);
+    setCategoryFilter(slug);
   };
 
   return (
@@ -131,12 +136,34 @@ export default function AdminProductsPage() {
         </Link>
       }
     >
+      {/* Category filter bar */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="flex items-center gap-1.5 text-sm font-medium text-slate-500"><Filter size={14} /> Filter:</span>
+        <button
+          onClick={() => handleCategoryFilter("")}
+          className={`px-3 py-1.5 text-xs font-semibold border transition ${categoryFilter === "" ? "bg-primary text-white border-primary" : "bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary"}`}
+        >
+          All
+        </button>
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => handleCategoryFilter(cat.slug)}
+            className={`px-3 py-1.5 text-xs font-semibold border transition ${categoryFilter === cat.slug ? "bg-primary text-white border-primary" : "bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary"}`}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <div className="h-64 animate-pulse border border-slate-200 bg-white" />
       ) : error ? (
         <div className="border border-red-200 bg-red-50 px-5 py-6 text-sm font-medium text-red-700">{error}</div>
       ) : products.length === 0 ? (
-        <div className="border border-dashed border-slate-300 bg-white px-5 py-16 text-center text-sm text-slate-500">No products yet.</div>
+        <div className="border border-dashed border-slate-300 bg-white px-5 py-16 text-center text-sm text-slate-500">
+          {categoryFilter ? `No products in this category.` : "No products yet."}
+        </div>
       ) : (
         <>
           <div className="grid gap-4 md:hidden">

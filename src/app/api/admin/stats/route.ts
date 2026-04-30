@@ -8,13 +8,17 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const [productCount, categoryCount, blogCount, totalInquiries, unreadInquiries, recentInquiries] = await Promise.all([
+    const [productCount, categoryCount, blogCount, totalInquiries, unreadInquiries, recentInquiries, categoriesWithCounts] = await Promise.all([
       prisma.product.count({ where: { isActive: true } }),
       prisma.productCategory.count(),
       prisma.blogPost.count(),
       prisma.inquiry.count(),
       prisma.inquiry.count({ where: { isRead: false } }),
       prisma.inquiry.findMany({ orderBy: { createdAt: "desc" }, take: 5, include: { product: { select: { name: true } } } }),
+      prisma.productCategory.findMany({
+        select: { name: true, _count: { select: { products: true } } },
+        orderBy: { sortOrder: "asc" },
+      }),
     ]);
 
     return NextResponse.json({
@@ -23,6 +27,7 @@ export async function GET() {
       blogs: blogCount,
       inquiries: { total: totalInquiries, unread: unreadInquiries },
       recentInquiries,
+      categoriesWithCounts: categoriesWithCounts.map((c) => ({ name: c.name, products: c._count.products })),
     });
   } catch (error) {
     logServerError("api.admin.stats.GET", error);
