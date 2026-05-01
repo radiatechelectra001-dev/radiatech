@@ -70,10 +70,13 @@ async function sendEmail({ to, subject, html }: { to: string[]; subject: string;
     return { ok: false, error: "No email recipient configured" };
   }
 
-  // Send individually and sequentially — Resend free plan allows 2 req/s
+  // Send individually and sequentially with spacing — Resend free plan: 2 req/s
   let lastResult: EmailResult = { ok: false, error: "No recipients" };
-  for (const addr of to) {
-    lastResult = await sendToOne(addr, subject, html);
+  for (let i = 0; i < to.length; i++) {
+    lastResult = await sendToOne(to[i], subject, html);
+    if (i < to.length - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+    }
   }
   return lastResult;
 }
