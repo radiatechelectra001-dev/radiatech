@@ -31,13 +31,27 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const data = await req.json();
   if (data.slug) data.slug = sanitizeSlug(data.slug);
+  else if (data.name) data.slug = sanitizeSlug(data.name);
+
   try {
+    // Check slug uniqueness against other categories (not itself)
+    if (data.slug) {
+      const conflict = await prisma.productCategory.findFirst({ where: { slug: data.slug, NOT: { id } } });
+      if (conflict) {
+        return NextResponse.json({ error: `Slug "${data.slug}" is already used by category "${conflict.name}".` }, { status: 400 });
+      }
+    }
+
     const category = await prisma.productCategory.update({ where: { id }, data });
     return NextResponse.json(category);
   } catch (error) {
     logServerError("api.categories.id.PUT", error);
     const status = isDatabaseUnavailableError(error) ? 503 : 400;
-    return jsonError(status === 503 ? DATABASE_UNAVAILABLE_MESSAGE : "Unable to update category.", status);
+    const isPrismaUniqueError = typeof error === "object" && error !== null && "code" in error && (error as { code: string }).code === "P2002";
+    return jsonError(
+      status === 503 ? DATABASE_UNAVAILABLE_MESSAGE : isPrismaUniqueError ? "A category with that slug already exists." : "Unable to update category.",
+      status,
+    );
   }
 }
 

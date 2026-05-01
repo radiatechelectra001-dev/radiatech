@@ -36,9 +36,21 @@ export async function POST(req: NextRequest) {
 
   try {
     const data = await req.json();
+    const slug = sanitizeSlug(data.slug || data.name);
+
+    if (!slug) {
+      return jsonError("Category name is required.", 400);
+    }
+
+    // Check for existing slug before inserting to give a clear error
+    const existing = await prisma.productCategory.findUnique({ where: { slug } });
+    if (existing) {
+      return jsonError(`A category with slug "${slug}" already exists (name: "${existing.name}"). Please use a different name or edit the existing category.`, 400);
+    }
+
     const category = await prisma.productCategory.create({
       data: {
-        slug: sanitizeSlug(data.slug || data.name),
+        slug,
         name: data.name,
         description: data.description || "",
         image: data.image || "",
@@ -49,6 +61,11 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     logServerError("api.categories.POST", error);
     const status = isDatabaseUnavailableError(error) ? 503 : 400;
-    return jsonError(status === 503 ? DATABASE_UNAVAILABLE_MESSAGE : "Unable to create category. Check the fields and try again.", status);
+    // P2002 = unique constraint — give a helpful message even if the pre-check missed a race condition
+    const isPrismaUniqueError = typeof error === "object" && error !== null && "code" in error && (error as { code: string }).code === "P2002";
+    return jsonError(
+      status === 503 ? DATABASE_UNAVAILABLE_MESSAGE : isPrismaUniqueError ? "A category with that name already exists. Please choose a different name." : "Unable to create category. Check the fields and try again.",
+      status,
+    );
   }
 }
