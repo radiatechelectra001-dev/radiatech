@@ -27,12 +27,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   icons: {
     icon: [
-      { url: "/icon.png", type: "image/png" },
+      { url: "/favicon.png", type: "image/png" },
     ],
     apple: [
-      { url: "/apple-icon.png", type: "image/png" },
+      { url: "/favicon.png", type: "image/png" },
     ],
-    shortcut: "/icon.png",
+    shortcut: "/favicon.png",
   },
   openGraph: {
     type: "website",
