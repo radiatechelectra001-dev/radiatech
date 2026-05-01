@@ -42,19 +42,11 @@ function getAdminRecipients() {
     .filter(Boolean);
 }
 
-async function sendEmail({ to, subject, html }: { to: string[]; subject: string; html: string }): Promise<EmailResult> {
-  if (!process.env.RESEND_API_KEY) {
-    return { ok: false, error: "RESEND_API_KEY is not configured" };
-  }
-
-  if (to.length === 0) {
-    return { ok: false, error: "No email recipient configured" };
-  }
-
+async function sendToOne(to: string, subject: string, html: string): Promise<EmailResult> {
   try {
     const result = await resend.emails.send({
       from: process.env.EMAIL_FROM || "Radiatech Electra <noreply@radiatech.in>",
-      to,
+      to: [to],
       subject,
       html,
     });
@@ -67,6 +59,23 @@ async function sendEmail({ to, subject, html }: { to: string[]; subject: string;
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Email delivery failed" };
   }
+}
+
+async function sendEmail({ to, subject, html }: { to: string[]; subject: string; html: string }): Promise<EmailResult> {
+  if (!process.env.RESEND_API_KEY) {
+    return { ok: false, error: "RESEND_API_KEY is not configured" };
+  }
+
+  if (to.length === 0) {
+    return { ok: false, error: "No email recipient configured" };
+  }
+
+  // Send individually and sequentially — Resend free plan allows 2 req/s
+  let lastResult: EmailResult = { ok: false, error: "No recipients" };
+  for (const addr of to) {
+    lastResult = await sendToOne(addr, subject, html);
+  }
+  return lastResult;
 }
 
 function buildRow(label: string, value?: string, href?: string) {
@@ -154,10 +163,12 @@ export async function sendCustomerConfirmation(data: InquiryEmailData): Promise<
 }
 
 export async function sendInquiryEmails(data: InquiryEmailData) {
-  const [admin, customer] = await Promise.all([
-    sendAdminNotification(data),
-    data.email ? sendCustomerConfirmation(data) : Promise.resolve({ ok: true } as EmailResult),
-  ]);
+  // Send sequentially with a gap — Resend free plan allows only 2 req/sec.
+  // Admin notification may itself send to multiple recipients one-by-one,
+  // so we wait for it to fully complete before sending the customer email.
+  const admin = await sendAdminNotification(data);
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  const customer = data.email ? await sendCustomerConfirmation(data) : ({ ok: true } as EmailResult);
 
   return { admin, customer };
 }

@@ -25,6 +25,8 @@ async function main() {
     process.env.EXTRA_ADMIN_EMAIL && process.env.EXTRA_ADMIN_PASSWORD
       ? { email: process.env.EXTRA_ADMIN_EMAIL, password: process.env.EXTRA_ADMIN_PASSWORD, name: "Radiatech Admin" }
       : null,
+    { email: "deepak@radiatech.in", password: "D33p@k#Rd!T3ch26", name: "Deepak" },
+    { email: "radiatechelectra@gmail.com", password: "R4d!@T3ch*E1ctr@26", name: "Radiatech Electra" },
   ].filter(Boolean);
 
   for (const adminUser of adminUsers) {
@@ -43,7 +45,7 @@ async function main() {
 
   // Seed categories
   const categoryData = [
-    { slug: "ppr-pipes", name: "PPR Pipes", description: "Premium quality PPR-C pipes available in sizes from 20MM to 615 mm with pressure ratings from PN 6 to PN 20.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg", sortOrder: 1 },
+    { slug: "ppr-pipes", name: "PPR Pipes", description: "Premium quality PPR-C pipes available in sizes from 20MM to 615 MM with pressure ratings from PN 6 to PN 20.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg", sortOrder: 1 },
     { slug: "ppr-pipe-fittings", name: "PPR Pipe Fittings", description: "Complete range of PPR pipe fittings including elbows, tees, couplers, clamps, and reducers.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM.jpeg", sortOrder: 2 },
     { slug: "pprc-fittings", name: "PPRC Fittings", description: "Industrial-grade PPRC fittings for large diameter piping systems in industrial and process applications.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM (1).jpeg", sortOrder: 3 },
     { slug: "pipes-fittings", name: "Pipes & Fittings", description: "General-purpose pipes and fittings for construction and plumbing applications.", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM (2).jpeg", sortOrder: 4 },
@@ -64,7 +66,7 @@ async function main() {
 
   // Seed products
   const productData = [
-    { slug: "fusion-ppr-pipes", name: "Fusion PPR Pipes", catSlug: "ppr-pipes", description: "High-quality Fusion PPR pipes designed for industrial and commercial applications.", specs: { Material: "PPR-C (Polypropylene Random Copolymer Type 3)", "Size Range": "20MM to 615 mm", "Pressure Rating": "PN 6 to PN 20", Standard: "DIN 16962", "Temperature Range": "Up to 95°C", "Service Life": "50+ years", Color: "Green / White" }, apps: ["Hot/Cold Water Supply", "Chemical Plants", "Cooling Towers", "Condensor Lines"], image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg", featured: true },
+    { slug: "fusion-ppr-pipes", name: "Fusion PPR Pipes", catSlug: "ppr-pipes", description: "High-quality Fusion PPR pipes designed for industrial and commercial applications.", specs: { Material: "PPR-C (Polypropylene Random Copolymer Type 3)", "Size Range": "20MM to 615 MM", "Pressure Rating": "PN 6 to PN 20", Standard: "DIN 16962", "Temperature Range": "Up to 95°C", "Service Life": "50+ years", Color: "Green / White" }, apps: ["Hot/Cold Water Supply", "Chemical Plants", "Cooling Towers", "Condensor Lines"], image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg", featured: true },
     { slug: "fusion-ppr-pipe-pn16", name: "Fusion PPR Pipe PN 16 Waterline Special", catSlug: "ppr-pipes", description: "Specialized PN 16 rated PPR pipes designed specifically for waterline applications.", specs: { Material: "PPR-C Type 3", "Pressure Rating": "PN 16", Standard: "DIN 16962", "Temperature Range": "Up to 95°C", "Inner Layer": "Anti-microbial", "Outer Layer": "UV Stabilized", "Service Life": "50+ years" }, apps: ["Drinking Water Supply", "Plumbing", "DM Water Lines", "Liquid Food Supply"], image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg", featured: true },
     { slug: "green-therm-ppr-pipes", name: "Green Therm PPR Pipes", catSlug: "ppr-pipes", description: "Premium Green Therm PPR pipes with enhanced thermal properties.", specs: { Material: "PPR-C Type 3 with UV Stabilizer", "Size Range": "20mm to 160mm", "Pressure Rating": "PN 10 to PN 20", Standard: "DIN 16962", "UV Protection": "Yes", "Anti-microbial": "Yes", "Service Life": "50+ years" }, apps: ["Solar Water Heater", "Hot Water Supply", "Industrial Cooling", "Process Lines"], image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.28 PM.jpeg", featured: true },
     { slug: "fusion-ppr-pipes-standard", name: "Fusion PPR Pipes - Standard Range", catSlug: "ppr-pipes", description: "Standard range Fusion PPR pipes for general-purpose industrial piping.", specs: { Material: "PPR-C", "Friction Factor": "1.5 Ft/100 Ft", "Chemical Resistance": "Excellent", "Sound Insulation": "Yes", "Frost Proof": "Yes", "Leak Proof": "Yes" }, apps: ["Chilled Water Supply", "Pharmaceutical Industries", "RO Plants", "Fire Applications"], image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg" },

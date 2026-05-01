@@ -93,7 +93,7 @@ export default function AdminShell({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 lg:grid lg:grid-cols-[280px_1fr]">
-      <aside className="hidden min-h-screen lg:block">{sidebar}</aside>
+      <aside className="sticky top-0 hidden h-screen overflow-y-auto lg:block">{sidebar}</aside>
 
       {sidebarOpen && <button aria-label="Close menu overlay" className="fixed inset-0 z-40 bg-slate-900/45 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 

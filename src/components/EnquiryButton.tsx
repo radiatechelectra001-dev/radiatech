@@ -58,7 +58,7 @@ export default function EnquiryButton({ productName, label = "Send Enquiry", cla
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={className}>
+      <button type="button" onClick={() => setOpen(true)} className={className} suppressHydrationWarning>
         {label}
       </button>
 

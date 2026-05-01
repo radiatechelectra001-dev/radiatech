@@ -96,6 +96,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className={inputClass}
+            suppressHydrationWarning
           />
           <input
             type="tel"
@@ -104,6 +105,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             className={inputClass}
+            suppressHydrationWarning
           />
           <input
             type="email"
@@ -111,6 +113,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             className={inputClass}
+            suppressHydrationWarning
           />
           <textarea
             placeholder="Message (optional)"
@@ -118,6 +121,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
             value={formData.message}
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             className={`${inputClass} resize-none`}
+            suppressHydrationWarning
           />
         </>
       ) : (
@@ -130,6 +134,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           className={inputClass}
+          suppressHydrationWarning
         />
         {!compact && (
           <input
@@ -139,6 +144,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             className={inputClass}
+            suppressHydrationWarning
           />
         )}
       </div>
@@ -151,6 +157,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           className={inputClass}
+          suppressHydrationWarning
         />
       )}
       
@@ -162,6 +169,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           className={inputClass}
+          suppressHydrationWarning
         />
         {!compact && (
           <input
@@ -170,6 +178,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
             value={formData.company}
             onChange={(e) => setFormData({ ...formData, company: e.target.value })}
             className={inputClass}
+            suppressHydrationWarning
           />
         )}
       </div>
@@ -181,6 +190,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
           value={formData.quantity}
           onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
           className={inputClass}
+          suppressHydrationWarning
         />
       )}
 
@@ -191,6 +201,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
         value={formData.message}
         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
         className={`${inputClass} resize-none`}
+        suppressHydrationWarning
       />
         </>
       )}
@@ -205,6 +216,7 @@ export default function InquiryForm({ productName, compact, onDark, minimal }: I
         type="submit"
         disabled={submitting}
         className={`w-full bg-accent hover:bg-accent-dark text-white py-3 ${onDark ? "" : "rounded-lg"} text-sm font-semibold transition-colors shadow-lg shadow-accent/20 disabled:cursor-not-allowed disabled:opacity-70`}
+        suppressHydrationWarning
       >
         {submitting ? "Sending..." : compact || minimal ? "Send Inquiry" : "Submit Inquiry"}
       </button>
