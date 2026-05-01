@@ -76,9 +76,12 @@ export default function AdminCategoriesPage() {
     setForm(emptyForm);
   };
 
+  const sanitizeSlug = (raw: string) =>
+    raw.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const slug = form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const slug = sanitizeSlug(form.slug || form.name);
     const url = editId ? `/api/categories/${editId}` : "/api/categories";
     const method = editId ? "PUT" : "POST";
     const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, slug }) });

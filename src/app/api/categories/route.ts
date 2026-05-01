@@ -22,6 +22,14 @@ export async function GET(req: NextRequest) {
   }
 }
 
+function sanitizeSlug(raw: string): string {
+  return raw
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,7 +38,7 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const category = await prisma.productCategory.create({
       data: {
-        slug: data.slug,
+        slug: sanitizeSlug(data.slug || data.name),
         name: data.name,
         description: data.description || "",
         image: data.image || "",

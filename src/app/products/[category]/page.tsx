@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { companyInfo } from "@/data/company";
 import { getPublicCategories, getPublicCategoryBySlug, getPublicProductsByCategory } from "@/lib/publicProducts";
@@ -19,10 +19,23 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
   return { title: cat ? `${cat.name} - Radiatech Electra` : "Products" };
 }
 
+function slugify(raw: string): string {
+  return raw.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
+  // Redirect to the canonical slug if the URL has bad casing or spaces
+  const canonical = slugify(decodeURIComponent(category));
+  if (canonical !== category) redirect(`/products/${canonical}`);
+
   const cat = await getPublicCategoryBySlug(category);
-  if (!cat) notFound();
+  if (!cat) {
+    // Try the canonical slug as a last-resort fallback
+    const catByCanonical = await getPublicCategoryBySlug(canonical);
+    if (catByCanonical) redirect(`/products/${catByCanonical.slug}`);
+    notFound();
+  }
 
   const products = await getPublicProductsByCategory(category);
 
