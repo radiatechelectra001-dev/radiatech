@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { BarChart3, BookOpenText, FolderTree, Inbox, LogOut, Menu, Package, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { BarChart3, BookOpenText, FolderTree, Inbox, LogOut, Menu, Package, UserCircle, X } from "lucide-react";
 import { companyInfo } from "@/data/company";
 
 const navItems = [
@@ -13,7 +13,14 @@ const navItems = [
   { label: "Categories", href: "/admin/categories", icon: FolderTree },
   { label: "Blog Posts", href: "/admin/blogs", icon: BookOpenText },
   { label: "Inquiries", href: "/admin/inquiries", icon: Inbox },
+  { label: "My Profile", href: "/admin/profile", icon: UserCircle },
 ];
+
+interface AdminUser {
+  id: string;
+  email: string;
+  name?: string | null;
+}
 
 function isActivePath(pathname: string, href: string) {
   if (href === "/admin") return pathname === href;
@@ -34,6 +41,14 @@ export default function AdminShell({
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((data: { user?: AdminUser }) => { if (data.user) setAdminUser(data.user); })
+      .catch(() => null);
+  }, []);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -77,6 +92,20 @@ export default function AdminShell({
       </nav>
 
       <div className="border-t border-white/10 p-3">
+        {adminUser && (
+          <Link
+            href="/admin/profile"
+            className="mb-2 flex items-center gap-3 px-3 py-2.5 hover:bg-white/10 transition-colors"
+          >
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white">
+              {(adminUser.name ?? adminUser.email).charAt(0).toUpperCase()}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-medium text-white">{adminUser.name ?? "Admin"}</span>
+              <span className="block truncate text-xs text-white/55">{adminUser.email}</span>
+            </span>
+          </Link>
+        )}
         <Link href="/" className="mb-2 block px-3 py-2 text-xs font-medium text-white/55 hover:text-white">
           View public website
         </Link>
