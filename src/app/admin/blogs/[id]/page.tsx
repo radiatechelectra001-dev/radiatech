@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/ImageUpload";
+import MultiImageUpload from "@/components/MultiImageUpload";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 
 function tagsTextFromValue(value: unknown) {
@@ -26,6 +27,33 @@ function plainTextFromHtml(value: string) {
   return value.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
 }
 
+function parseImages(value: unknown, coverImage = "") {
+  if (Array.isArray(value)) return value.filter((image): image is string => typeof image === "string" && image.length > 0);
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed.filter((image): image is string => typeof image === "string" && image.length > 0);
+    } catch {
+      return coverImage ? [coverImage] : [];
+    }
+  }
+  return coverImage ? [coverImage] : [];
+}
+
+function todayInputDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function dateInputFromValue(value: unknown) {
+  if (!value) return todayInputDate();
+  const date = new Date(String(value));
+  return Number.isNaN(date.getTime()) ? todayInputDate() : date.toISOString().slice(0, 10);
+}
+
+function publishedIsoFromInput(value: string) {
+  return new Date(`${value || todayInputDate()}T12:00:00.000Z`).toISOString();
+}
+
 export default function AdminBlogForm({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -39,9 +67,11 @@ export default function AdminBlogForm({ params }: { params: Promise<{ id: string
     excerpt: "",
     content: "",
     coverImage: "",
+    images: [] as string[],
     author: "R Singh",
     tagsText: "",
     isPublished: false,
+    publishedDate: todayInputDate(),
   });
 
   useEffect(() => {
@@ -73,9 +103,11 @@ export default function AdminBlogForm({ params }: { params: Promise<{ id: string
               excerpt: String(blog.excerpt || ""),
               content: String(blog.content || ""),
               coverImage: String(blog.coverImage || ""),
+              images: parseImages(blog.images, String(blog.coverImage || "")),
               author: String(blog.author || "R Singh"),
               tagsText: tagsTextFromValue(blog.tags),
               isPublished: Boolean(blog.isPublished),
+              publishedDate: dateInputFromValue(blog.publishedAt || blog.createdAt),
             });
           }
         }
@@ -113,10 +145,11 @@ export default function AdminBlogForm({ params }: { params: Promise<{ id: string
       excerpt: form.excerpt.trim(),
       content: form.content,
       coverImage: form.coverImage,
+      images: form.images.length > 0 ? form.images : form.coverImage ? [form.coverImage] : [],
       author: form.author.trim() || "R Singh",
       tags: parseTagsText(form.tagsText),
       isPublished: form.isPublished,
-      publishedAt: form.isPublished ? new Date().toISOString() : null,
+      publishedAt: form.isPublished ? publishedIsoFromInput(form.publishedDate) : null,
     };
     const url = isEdit ? `/api/blogs/${blogId}` : "/api/blogs";
     const method = isEdit ? "PUT" : "POST";
@@ -155,14 +188,18 @@ export default function AdminBlogForm({ params }: { params: Promise<{ id: string
           </div>
           <Field label="Excerpt *" className="mt-4"><textarea required rows={3} value={form.excerpt} onChange={(event) => setForm({ ...form, excerpt: event.target.value })} className="admin-input resize-none" /></Field>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <ImageUpload folder="blogs" currentImage={form.coverImage} onImageSelect={(url) => setForm({ ...form, coverImage: url })} label="Cover Image" />
+            <ImageUpload folder="blogs" currentImage={form.coverImage} onImageSelect={(url) => setForm({ ...form, coverImage: url, images: form.images.length > 0 ? form.images : url ? [url] : [] })} label="Cover Image" />
             <div className="space-y-4">
               <Field label="Tags"><input value={form.tagsText} onChange={(event) => setForm({ ...form, tagsText: event.target.value })} placeholder="PPR-C, Industrial, Guide" className="admin-input" /></Field>
+              <Field label="Publish Date"><input type="date" value={form.publishedDate} onChange={(event) => setForm({ ...form, publishedDate: event.target.value })} className="admin-input" /></Field>
               <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
                 <input type="checkbox" checked={form.isPublished} onChange={(event) => setForm({ ...form, isPublished: event.target.checked })} className="h-4 w-4 border-slate-300 text-primary" />
                 Published
               </label>
             </div>
+          </div>
+          <div className="mt-5">
+            <MultiImageUpload folder="blogs" currentImages={form.images} onImagesSelect={(urls) => setForm({ ...form, images: urls, coverImage: form.coverImage || urls[0] || "" })} label="Blog Gallery Images" />
           </div>
         </section>
 

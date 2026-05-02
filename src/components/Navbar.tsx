@@ -5,22 +5,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, Phone, Mail, MapPin, ChevronDown } from "lucide-react";
 import { companyInfo } from "@/data/company";
+import useCategoryLinks from "@/components/useCategoryLinks";
 
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
-  {
-    label: "Products",
-    href: "/products",
-    children: [
-      { label: "PPR Pipes", href: "/products/ppr-pipes" },
-      { label: "PPR Pipe Fittings", href: "/products/ppr-pipe-fittings" },
-      { label: "PPRC Fittings", href: "/products/pprc-fittings" },
-      { label: "Pipes & Fittings", href: "/products/pipes-fittings" },
-      { label: "Compressed Air Fittings", href: "/products/compressed-air-pipe-fittings" },
-      { label: "Industrial Piping Services", href: "/products/industrial-piping-services" },
-    ],
-  },
+  { label: "Products", href: "/products" },
   { label: "Catalogue", href: "/catalogue" },
   { label: "Infrastructure", href: "/infrastructure" },
   { label: "Clients", href: "/clients" },
@@ -31,6 +21,7 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const productLinks = useCategoryLinks();
 
   return (
     <>
@@ -76,7 +67,7 @@ export default function Navbar() {
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) =>
-                link.children ? (
+                link.href === "/products" ? (
                   <div
                     key={link.label}
                     className="relative"
@@ -92,7 +83,7 @@ export default function Navbar() {
                     </Link>
                     {dropdownOpen && (
                       <div className="absolute top-full left-0 bg-white shadow-xl rounded-lg border border-gray-100 py-2 min-w-[240px] animate-fade-in">
-                        {link.children.map((child) => (
+                        {productLinks.map((child) => (
                           <Link
                             key={child.href}
                             href={child.href}
@@ -148,9 +139,9 @@ export default function Navbar() {
                   >
                     {link.label}
                   </Link>
-                  {link.children && (
+                  {link.href === "/products" && productLinks.length > 0 && (
                     <div className="pl-6 space-y-1">
-                      {link.children.map((child) => (
+                      {productLinks.map((child) => (
                         <Link
                           key={child.href}
                           href={child.href}

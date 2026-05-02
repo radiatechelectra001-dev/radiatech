@@ -3,9 +3,12 @@ import Image from "next/image";
 import { Shield, Clock, Tag, Users, Truck, Calendar, CheckCircle, Star, ArrowRight, ChevronRight, Phone, Factory, Wrench, Award } from "lucide-react";
 import { companyInfo } from "@/data/company";
 import { getPublicCategories, getPublicFeaturedProducts, getPublicNewArrivals } from "@/lib/publicProducts";
-import { reviews, overallRating } from "@/data/reviews";
+import { getPublicProjectImages } from "@/lib/publicGalleries";
+import { getRecentPublishedBlogs, parseBlogImages } from "@/lib/publicBlogs";
+import ExpandableGallery from "@/components/ExpandableGallery";
 import InquiryForm from "@/components/InquiryForm";
 import EnquiryButton from "@/components/EnquiryButton";
+import RatingSummary from "@/components/RatingSummary";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +22,12 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export default async function HomePage() {
-  const [categories, newArrivals, featuredProducts] = await Promise.all([
+  const [categories, newArrivals, featuredProducts, projectImages, recentBlogs] = await Promise.all([
     getPublicCategories(),
     getPublicNewArrivals(8),
     getPublicFeaturedProducts(8),
+    getPublicProjectImages(),
+    getRecentPublishedBlogs(3),
   ]);
 
   return (
@@ -324,23 +329,7 @@ export default async function HomePage() {
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Our Projects</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">Showcasing our expertise in industrial piping installations across process industries.</p>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-            {[
-              { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.21 PM.jpeg", title: "Cooling Tower Piping Installation" },
-              { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM (1).jpeg", title: "Industrial PPR-C Pipeline System" },
-              { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM (2).jpeg", title: "Process Plant Piping Network" },
-              { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.24 PM.jpeg", title: "Pump Room Piping Installation" },
-              { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.25 PM.jpeg", title: "HVAC System PPR-C Piping" },
-              { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.28 PM.jpeg", title: "Factory Pipeline Installation" },
-            ].map((img, i) => (
-              <div key={i} className="group relative overflow-hidden shadow-sm hover:shadow-xl transition-all">
-                <Image src={img.src} alt={img.title} width={500} height={350} className="w-full h-40 sm:h-64 object-cover group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="absolute bottom-4 left-4 right-4 text-white"><h3 className="font-semibold text-sm">{img.title}</h3></div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ExpandableGallery images={projectImages} initialLimit={6} />
         </div>
       </section>
 
@@ -380,44 +369,7 @@ export default async function HomePage() {
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Ratings & Reviews</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">See what our customers say about us on IndiaMART.</p>
           </div>
-          <div className="bg-white shadow-sm border border-gray-100 p-8 mb-10 max-w-3xl mx-auto">
-            <div className="flex flex-col sm:flex-row items-center gap-8">
-              <div className="text-center">
-                <div className="text-5xl font-bold text-primary mb-1">{overallRating.average}</div>
-                <div className="flex items-center gap-1 justify-center mb-2">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} size={20} className={s <= Math.round(overallRating.average) ? "text-accent fill-accent" : "text-gray-300"} />
-                  ))}
-                </div>
-                <div className="text-sm text-gray-500">{overallRating.total} Reviews</div>
-              </div>
-              <div className="flex-1 grid grid-cols-3 gap-6">
-                <div className="text-center"><div className="text-2xl font-bold text-green">{overallRating.quality}</div><div className="text-xs text-gray-500">Quality</div></div>
-                <div className="text-center"><div className="text-2xl font-bold text-green">{overallRating.delivery}</div><div className="text-xs text-gray-500">Delivery</div></div>
-                <div className="text-center"><div className="text-2xl font-bold text-accent">{overallRating.satisfaction}</div><div className="text-xs text-gray-500">Satisfaction</div></div>
-              </div>
-            </div>
-          </div>
-          <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 overflow-x-auto sm:overflow-visible -mx-4 sm:mx-0 px-4 sm:px-0 snap-x snap-mandatory sm:snap-none pb-2 sm:pb-0">
-            {reviews.slice(0, 6).map((review, i) => (
-              <div key={i} className="bg-white p-5 sm:p-6 shadow-sm border border-gray-100 shrink-0 w-[80%] sm:w-auto snap-start">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm">{review.name[0]}</div>
-                  <div>
-                    <div className="font-semibold text-sm text-gray-900">{review.name}</div>
-                    <div className="text-xs text-gray-500">{review.location}</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 mb-2">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} size={14} className={s <= review.rating ? "text-accent fill-accent" : "text-gray-300"} />
-                  ))}
-                  <span className="text-xs text-gray-400 ml-2">{review.date}</span>
-                </div>
-                <p className="text-sm text-gray-600">Product: <span className="font-medium">{review.product}</span></p>
-              </div>
-            ))}
-          </div>
+          <RatingSummary />
         </div>
       </section>
 
@@ -447,25 +399,28 @@ export default async function HomePage() {
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Industry Insights & Updates</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">Stay informed with the latest news, technical guides, and industry trends in PPR-C piping solutions.</p>
           </div>
-          <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 overflow-x-auto sm:overflow-visible -mx-4 sm:mx-0 px-4 sm:px-0 snap-x snap-mandatory sm:snap-none pb-2 sm:pb-0">
-            {[
-              { slug: "pprc-vs-cpvc-pipes-comparison", title: "PPR-C vs CPVC Pipes: A Comprehensive Comparison for Industrial Use", excerpt: "A detailed comparison of PPR-C and CPVC piping systems covering durability, chemical resistance, temperature ratings, and cost-effectiveness for industrial applications.", date: "2025-12-15", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.21 PM.jpeg" },
-              { slug: "benefits-of-pprc-pipes-in-industrial-piping", title: "Top 10 Benefits of PPR-C Pipes in Industrial Piping Applications", excerpt: "Discover why PPR-C pipes are becoming the preferred choice for industrial piping, from corrosion resistance to longevity and ease of installation.", date: "2025-11-20", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM.jpeg" },
-              { slug: "pprc-pipe-installation-guide", title: "Complete Guide to PPR-C Pipe Installation: Best Practices", excerpt: "Learn the proper techniques for PPR-C pipe installation, including heat fusion welding, support spacing, and quality assurance measures.", date: "2025-10-10", image: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.24 PM.jpeg" },
-            ].map((post) => (
-              <Link key={post.slug} href={`/blogs/${post.slug}`} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 shrink-0 w-[80%] sm:w-auto snap-start">
-                <div className="relative h-48 overflow-hidden">
-                  <Image src={post.image} alt={post.title} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 80vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
-                </div>
-                <div className="p-5">
-                  <span className="text-xs text-gray-400">{new Date(post.date).toLocaleDateString("en-IN", { month: "long", day: "numeric", year: "numeric" })}</span>
-                  <h3 className="font-semibold text-gray-900 mt-2 mb-2 line-clamp-2 group-hover:text-primary transition-colors">{post.title}</h3>
-                  <p className="text-gray-500 text-sm line-clamp-2 mb-3">{post.excerpt}</p>
-                  <span className="text-primary text-sm font-semibold flex items-center gap-1">Read More <ArrowRight size={14} /></span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {recentBlogs.length === 0 ? (
+            <div className="border border-dashed border-gray-200 bg-gray-50 px-5 py-12 text-center text-sm text-gray-500">No blog posts published yet.</div>
+          ) : (
+            <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 overflow-x-auto sm:overflow-visible -mx-4 sm:mx-0 px-4 sm:px-0 snap-x snap-mandatory sm:snap-none pb-2 sm:pb-0">
+              {recentBlogs.map((post) => {
+                const thumbnail = post.coverImage || parseBlogImages(post.images)[0] || "/images/projects/WhatsApp Image 2026-04-17 at 12.17.21 PM.jpeg";
+                return (
+                  <Link key={post.id} href={`/blogs/${post.slug}`} className="group bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 shrink-0 w-[80%] sm:w-auto snap-start">
+                    <div className="relative h-48 overflow-hidden">
+                      <Image src={thumbnail} alt={post.title} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 80vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    <div className="p-5">
+                      <span className="text-xs text-gray-400">{new Date(post.publishedAt || post.createdAt).toLocaleDateString("en-IN", { month: "long", day: "numeric", year: "numeric" })}</span>
+                      <h3 className="font-semibold text-gray-900 mt-2 mb-2 line-clamp-2 group-hover:text-primary transition-colors">{post.title}</h3>
+                      <p className="text-gray-500 text-sm line-clamp-2 mb-3">{post.excerpt}</p>
+                      <span className="text-primary text-sm font-semibold flex items-center gap-1">Read More <ArrowRight size={14} /></span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
           <div className="text-center mt-10">
             <Link href="/blogs" className="inline-flex items-center gap-2 border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 rounded-xl text-sm font-semibold transition-colors">
               View All Articles <ArrowRight size={18} />

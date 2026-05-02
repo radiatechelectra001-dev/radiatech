@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Download, ExternalLink, FileText } from "lucide-react";
 
 export const metadata = {
@@ -26,6 +27,9 @@ export default function CataloguePage() {
 
       <section className="py-8 sm:py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="mb-8 overflow-hidden border border-gray-200 bg-white shadow-sm">
+            <Image src="/technical details_page-0001.jpg.jpeg" alt="Radiatech technical details" width={1200} height={1600} className="h-auto w-full" priority />
+          </div>
           <div className="h-[72vh] min-h-[520px] overflow-hidden border border-gray-200 bg-white shadow-sm">
             <iframe src="/RADIATECH-CATALOGUE.pdf#view=FitH" title="Radiatech Electra Catalogue" className="h-full w-full" />
           </div>

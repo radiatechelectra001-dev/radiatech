@@ -10,6 +10,7 @@ export type PublicBlogPost = {
   excerpt: string;
   content: string;
   coverImage: string;
+  images: string;
   author: string;
   tags: string;
   publishedAt: Date | null;
@@ -49,6 +50,7 @@ const fallbackBlogs: PublicBlogPost[] = blogPosts
       excerpt: blog.excerpt,
       content: markdownToHtml(blog.content),
       coverImage: blog.image,
+      images: JSON.stringify(blog.image ? [blog.image] : []),
       author: blog.author,
       tags: JSON.stringify(blog.tags),
       publishedAt: date,
@@ -56,7 +58,33 @@ const fallbackBlogs: PublicBlogPost[] = blogPosts
       updatedAt: date,
     };
   })
-  .sort((first, second) => second.createdAt.getTime() - first.createdAt.getTime());
+  .sort((first, second) => getBlogTimestamp(second) - getBlogTimestamp(first));
+
+export type PublicBlogsPage = {
+  items: PublicBlogPost[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+function getBlogTimestamp(blog: Pick<PublicBlogPost, "publishedAt" | "createdAt">) {
+  return (blog.publishedAt ?? blog.createdAt).getTime();
+}
+
+function paginateBlogs(blogs: PublicBlogPost[], page: number, pageSize: number): PublicBlogsPage {
+  const total = blogs.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const start = (safePage - 1) * pageSize;
+
+  return {
+    items: blogs.slice(start, start + pageSize),
+    pagination: { page: safePage, pageSize, total, totalPages },
+  };
+}
 
 async function queryBlogs<T>(query: (client: PrismaClientInstance) => Promise<T>, fallback: T) {
   if (shouldSkipPublicDbRead()) {
@@ -83,14 +111,58 @@ export function parseBlogTags(tags: string) {
   }
 }
 
+export function parseBlogImages(images: string, coverImage = "") {
+  try {
+    const parsed = JSON.parse(images);
+    const gallery = Array.isArray(parsed) ? parsed.filter((image): image is string => typeof image === "string" && image.trim().length > 0) : [];
+    return coverImage ? Array.from(new Set([coverImage, ...gallery])) : gallery;
+  } catch {
+    return coverImage ? [coverImage] : [];
+  }
+}
+
 export async function getPublishedBlogs() {
   return queryBlogs(
     (client) =>
       client.blogPost.findMany({
         where: { isPublished: true },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
       }),
     fallbackBlogs,
+  );
+}
+
+export async function getRecentPublishedBlogs(take = 3) {
+  return queryBlogs(
+    (client) =>
+      client.blogPost.findMany({
+        where: { isPublished: true },
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+        take,
+      }),
+    fallbackBlogs.slice(0, take),
+  );
+}
+
+export async function getPublishedBlogsPage(page = 1, pageSize = 9): Promise<PublicBlogsPage> {
+  const normalizedPage = Math.max(1, page);
+  const normalizedPageSize = Math.min(50, Math.max(1, pageSize));
+
+  return queryBlogs(
+    async (client) => {
+      const total = await client.blogPost.count({ where: { isPublished: true } });
+      const totalPages = Math.max(1, Math.ceil(total / normalizedPageSize));
+      const safePage = Math.min(normalizedPage, totalPages);
+      const items = await client.blogPost.findMany({
+        where: { isPublished: true },
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+        skip: (safePage - 1) * normalizedPageSize,
+        take: normalizedPageSize,
+      });
+
+      return { items, pagination: { page: safePage, pageSize: normalizedPageSize, total, totalPages } };
+    },
+    paginateBlogs(fallbackBlogs, normalizedPage, normalizedPageSize),
   );
 }
 
@@ -106,7 +178,7 @@ export async function getRelatedBlogs(currentSlug: string, currentId: string, ta
     (client) =>
       client.blogPost.findMany({
         where: { isPublished: true, id: { not: currentId } },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
         take,
       }),
     fallbackBlogs.filter((blog) => blog.slug !== currentSlug).slice(0, take),

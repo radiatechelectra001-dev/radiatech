@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calendar, ArrowLeft, User, Tag } from "lucide-react";
 import { companyInfo } from "@/data/company";
-import { getPublishedBlogBySlug, getRelatedBlogs, parseBlogTags } from "@/lib/publicBlogs";
+import BlogImageViewer from "@/components/BlogImageViewer";
+import { getPublishedBlogBySlug, getRelatedBlogs, parseBlogImages, parseBlogTags } from "@/lib/publicBlogs";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,9 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
   if (!blog) notFound();
 
   const tags = parseBlogTags(blog.tags);
+  // Use all gallery images; fall back to cover so the viewer always has something
+  const rawImages = parseBlogImages(blog.images);
+  const allImages = rawImages.length > 0 ? rawImages : (blog.coverImage ? [blog.coverImage] : []);
 
   const relatedBlogs = await getRelatedBlogs(blog.slug, blog.id, 3);
 
@@ -45,18 +49,17 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
 
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4">
-          {blog.coverImage && (
-            <div className="overflow-hidden shadow-lg mb-10">
-              <Image src={blog.coverImage} alt={blog.title} width={900} height={450} className="w-full h-[240px] sm:h-[350px] object-cover" />
-            </div>
+          {allImages.length > 0 && (
+            <BlogImageViewer images={allImages} title={blog.title} />
           )}
+
           <article className="blog-content" dangerouslySetInnerHTML={{ __html: blog.content }} />
 
           {/* Tags */}
           {tags.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap mt-10 pt-6 border-t border-gray-100">
               <Tag size={16} className="text-gray-400" />
-              {tags.map((tag) => <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1.5">{tag}</span>)}
+              {tags.map((tag, idx) => <span key={`${tag}-${idx}`} className="bg-gray-100 text-gray-600 text-xs px-3 py-1.5">{tag}</span>)}
             </div>
           )}
 

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Upload, X } from "lucide-react";
 
 interface MultiImageUploadProps {
-  folder: "products" | "categories" | "blogs";
+  folder: "products" | "categories" | "blogs" | "projects" | "infrastructure";
   currentImages?: string[];
   onImagesSelect: (urls: string[]) => void;
   label?: string;

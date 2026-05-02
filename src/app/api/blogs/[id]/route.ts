@@ -15,6 +15,27 @@ function normalizeTags(value: unknown) {
   }
 }
 
+function normalizeImages(value: unknown) {
+  if (Array.isArray(value)) return value.filter((image): image is string => typeof image === "string" && image.trim().length > 0).map((image) => image.trim());
+  if (typeof value !== "string") return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((image): image is string => typeof image === "string" && image.trim().length > 0).map((image) => image.trim()) : [];
+  } catch {
+    return value.split(",").map((image) => image.trim()).filter(Boolean);
+  }
+}
+
+function resolvePublishedAt(data: Record<string, unknown>, existingPublishedAt?: Date | null) {
+  if (!data.isPublished) return null;
+  if (typeof data.publishedAt === "string" && data.publishedAt.trim()) {
+    const selectedDate = new Date(data.publishedAt);
+    if (!Number.isNaN(selectedDate.getTime())) return selectedDate;
+  }
+  return existingPublishedAt ?? new Date();
+}
+
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   try {
@@ -40,16 +61,18 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   try {
     const existing = await prisma.blogPost.findUnique({ where: { id }, select: { publishedAt: true } });
+    const images = normalizeImages(data.images);
     const updateData = {
       slug: data.slug,
       title: data.title,
       excerpt: data.excerpt || "",
       content: data.content || "",
-      coverImage: data.coverImage || "",
+      coverImage: data.coverImage || images[0] || "",
+      images: JSON.stringify(images),
       author: data.author || "R Singh",
       tags: JSON.stringify(normalizeTags(data.tags)),
       isPublished: Boolean(data.isPublished),
-      publishedAt: data.isPublished ? existing?.publishedAt ?? new Date() : null,
+      publishedAt: resolvePublishedAt(data, existing?.publishedAt),
     };
     const blog = await prisma.blogPost.update({ where: { id }, data: updateData });
     return NextResponse.json(blog);

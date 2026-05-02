@@ -159,7 +159,7 @@ export default function AdminBlogsPage() {
                     </td>
                     <td className="px-5 py-4 text-slate-600">{blog.author}</td>
                     <td className="px-5 py-4"><span className={`inline-flex px-2.5 py-1 text-xs font-semibold ${blog.isPublished ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{blog.isPublished ? "Published" : "Draft"}</span></td>
-                    <td className="px-5 py-4 text-slate-500">{new Date(blog.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}</td>
+                    <td className="px-5 py-4 text-slate-500">{new Date(blog.publishedAt || blog.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}</td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         <Link href={`/admin/blogs/${blog.id}`} className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-dark"><Edit3 size={15} /> Edit</Link>

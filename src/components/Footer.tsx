@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { ExternalLink, Mail, MapPin, Phone } from "lucide-react";
 import { companyInfo } from "@/data/company";
+import useCategoryLinks from "@/components/useCategoryLinks";
 
 export default function Footer() {
+  const productLinks = useCategoryLinks();
+
   return (
     <footer className="bg-primary text-white">
       {/* Main Footer */}
@@ -61,14 +66,7 @@ export default function Footer() {
           <div>
             <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-5">Our Products</h3>
             <ul className="space-y-2 sm:space-y-3">
-              {[
-                { label: "PPR Pipes", href: "/products/ppr-pipes" },
-                { label: "PPR Pipe Fittings", href: "/products/ppr-pipe-fittings" },
-                { label: "PPRC Fittings", href: "/products/pprc-fittings" },
-                { label: "Pipes & Fittings", href: "/products/pipes-fittings" },
-                { label: "Compressed Air Fittings", href: "/products/compressed-air-pipe-fittings" },
-                { label: "Industrial Piping Services", href: "/products/industrial-piping-services" },
-              ].map((link) => (
+              {productLinks.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-blue-100 hover:text-accent transition-colors text-xs sm:text-sm">
                     {link.label}

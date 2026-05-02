@@ -1,25 +1,19 @@
 import Image from "next/image";
 import { CheckCircle } from "lucide-react";
 import { companyInfo } from "@/data/company";
+import ExpandableGallery from "@/components/ExpandableGallery";
+import { getPublicInfrastructureImages } from "@/lib/publicGalleries";
 
 export const metadata = {
   title: "Infrastructure - Radiatech Electra",
   description: "Explore our sourcing, storage, testing, and installation capabilities equipped with modern tools and quality processes.",
 };
 
-const facilityImages = [
-  { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.21 PM.jpeg", title: "Main Production Unit" },
-  { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM (1).jpeg", title: "Piping Assembly Area" },
-  { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM (2).jpeg", title: "Valve & Fitting Testing" },
-  { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.24 PM.jpeg", title: "Pump & Motor Room" },
-  { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.25 PM.jpeg", title: "HVAC Integration Unit" },
-  { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.27 PM.jpeg", title: "Raw Material Warehouse" },
-  { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.28 PM.jpeg", title: "Pipeline Storage & Dispatch" },
-  { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.21 PM (1).jpeg", title: "Cooling Tower Project Site" },
-  { src: "/images/projects/WhatsApp Image 2026-04-17 at 12.17.20 PM.jpeg", title: "Completed Installation" },
-];
+export const dynamic = "force-dynamic";
 
-export default function InfrastructurePage() {
+export default async function InfrastructurePage() {
+  const facilityImages = await getPublicInfrastructureImages();
+
   return (
     <main>
       <section className="bg-gradient-to-r from-primary-dark to-primary py-16">
@@ -46,24 +40,13 @@ export default function InfrastructurePage() {
               </div>
             </div>
             <div className="overflow-hidden shadow-lg">
-              <Image src="/images/projects/WhatsApp Image 2026-04-17 at 12.17.21 PM.jpeg" alt="Radiatech Facility" width={600} height={450} className="w-full h-[400px] object-cover" />
+              <Image src="/ourinframainimg.png" alt="Radiatech Facility" width={600} height={450} className="w-full h-[400px] object-cover" />
             </div>
           </div>
 
           {/* Gallery */}
           <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">Facility Gallery</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-            {facilityImages.map((img, i) => (
-              <div key={i} className="group relative overflow-hidden shadow-sm hover:shadow-xl transition-all">
-                <Image src={img.src} alt={img.title} width={500} height={350} className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <h3 className="font-semibold">{img.title}</h3>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ExpandableGallery images={facilityImages} initialLimit={9} gridClassName="grid grid-cols-2 gap-6 lg:grid-cols-3" imageClassName="h-64" />
         </div>
       </section>
     </main>

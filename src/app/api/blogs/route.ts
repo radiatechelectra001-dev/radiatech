@@ -15,6 +15,27 @@ function normalizeTags(value: unknown) {
   }
 }
 
+function normalizeImages(value: unknown) {
+  if (Array.isArray(value)) return value.filter((image): image is string => typeof image === "string" && image.trim().length > 0).map((image) => image.trim());
+  if (typeof value !== "string") return [];
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((image): image is string => typeof image === "string" && image.trim().length > 0).map((image) => image.trim()) : [];
+  } catch {
+    return value.split(",").map((image) => image.trim()).filter(Boolean);
+  }
+}
+
+function resolvePublishedAt(data: Record<string, unknown>) {
+  if (!data.isPublished) return null;
+  if (typeof data.publishedAt === "string" && data.publishedAt.trim()) {
+    const selectedDate = new Date(data.publishedAt);
+    if (!Number.isNaN(selectedDate.getTime())) return selectedDate;
+  }
+  return new Date();
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const published = searchParams.get("published");
@@ -36,7 +57,7 @@ export async function GET(req: NextRequest) {
 
     if (shouldPaginate) {
       const [items, total] = await prisma.$transaction([
-        prisma.blogPost.findMany({ where, orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),
+        prisma.blogPost.findMany({ where, orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }], skip: (page - 1) * pageSize, take: pageSize }),
         prisma.blogPost.count({ where }),
       ]);
 
@@ -45,7 +66,7 @@ export async function GET(req: NextRequest) {
 
     const blogs = await prisma.blogPost.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
     });
     return NextResponse.json(blogs);
   } catch (error) {
@@ -61,17 +82,19 @@ export async function POST(req: NextRequest) {
 
   try {
     const data = await req.json();
+    const images = normalizeImages(data.images);
     const blog = await prisma.blogPost.create({
       data: {
         slug: data.slug,
         title: data.title,
         excerpt: data.excerpt || "",
         content: data.content || "",
-        coverImage: data.coverImage || "",
+        coverImage: data.coverImage || images[0] || "",
+        images: JSON.stringify(images),
         author: data.author || "R Singh",
         tags: JSON.stringify(normalizeTags(data.tags)),
         isPublished: data.isPublished || false,
-        publishedAt: data.isPublished ? new Date() : null,
+        publishedAt: resolvePublishedAt(data),
       },
     });
     return NextResponse.json(blog, { status: 201 });

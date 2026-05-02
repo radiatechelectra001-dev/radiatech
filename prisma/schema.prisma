@@ -54,12 +54,31 @@ model BlogPost {
   excerpt     String
   content     String
   coverImage  String   @default("")
+  images      String   @default("[]") // JSON string
   author      String   @default("R Singh")
   tags        String   @default("[]") // JSON string
   isPublished Boolean  @default(false)
   publishedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model ProjectImage {
+  id        String   @id @default(cuid())
+  title     String
+  image     String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InfrastructureImage {
+  id        String   @id @default(cuid())
+  title     String
+  image     String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Inquiry {

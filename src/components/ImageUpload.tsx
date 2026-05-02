@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
 
 interface ImageUploadProps {
-  folder: "products" | "categories" | "blogs";
+  folder: "products" | "categories" | "blogs" | "projects" | "infrastructure";
   onImageSelect: (url: string) => void;
   currentImage?: string;
   label?: string;
