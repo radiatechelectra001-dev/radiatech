@@ -111,16 +111,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  void children;
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full`}
+      data-scroll-behavior="smooth"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex items-center justify-center bg-white">
-        <p style={{ fontSize: "2rem", fontFamily: "sans-serif", color: "#111", textAlign: "center" }}>
-          Please contact to developer
-        </p>
+      <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <SiteFrame>{children}</SiteFrame>
       </body>
     </html>
   );
