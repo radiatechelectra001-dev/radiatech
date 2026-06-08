@@ -118,9 +118,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
       <body className="min-h-full flex items-center justify-center bg-white">
-        <p style={{ fontSize: "2rem", fontFamily: "sans-serif", color: "#111", textAlign: "center" }}>
-          Please contact to developer
-        </p>
+        <div style={{ fontFamily: "sans-serif", color: "#111", textAlign: "center" }}>
+          <p style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>Please contact to developer</p>
+          <p style={{ fontSize: "1.5rem" }}>📞 9621492080</p>
+        </div>
       </body>
     </html>
   );
